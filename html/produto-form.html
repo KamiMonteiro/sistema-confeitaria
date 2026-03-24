@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produto — Rosas & Tortas Confeitaria</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js" defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rose: { DEFAULT:'#F4A7B9', light:'#FAD4DE', dark:'#E8789A', deep:'#C9546E' },
+            mint: { DEFAULT:'#A8D5BA', light:'#D4EDE0', dark:'#6FBA96', deep:'#4A9B72' },
+          },
+          fontFamily: { display: ['Playfair Display','serif'] },
+          boxShadow: {
+            soft: '0 2px 16px rgba(244,167,185,0.15)',
+            card: '0 4px 24px rgba(200,120,140,0.10)',
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="petal-bg" data-page="produtos">
+
+<div class="page-layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span style="font-size:1.5rem;">🌹</span>
+      <div>
+        <p class="font-display" style="font-size:.875rem;font-weight:600;color:#1f2937;line-height:1.2;">Rosas & Tortas</p>
+        <p style="font-size:.7rem;color:#d1d5db;">Confeitaria</p>
+      </div>
+    </div>
+    <p class="sidebar-label">Menu</p>
+    <a class="nav-item" data-nav="dashboard" href="dashboard.html"><i class="fa-solid fa-house-chimney icon"></i> Dashboard</a>
+    <a class="nav-item" data-nav="produtos"  href="produtos-lista.html"><i class="fa-solid fa-cake-candles icon"></i> Produtos</a>
+    <a class="nav-item" data-nav="clientes"  href="#"><i class="fa-solid fa-users icon"></i> Clientes</a>
+    <a class="nav-item" data-nav="pedidos"   href="#"><i class="fa-solid fa-bag-shopping icon"></i> Pedidos</a>
+    <a class="nav-item" data-nav="pagamentos" href="#"><i class="fa-solid fa-credit-card icon"></i> Formas de Pag.</a>
+    <a class="nav-item" data-nav="usuarios"  href="#"><i class="fa-solid fa-user-shield icon"></i> Usuários</a>
+    <div style="flex:1;"></div>
+    <div style="border-top:1px solid #FFF0F4;padding-top:.75rem;margin-top:.75rem;">
+      <a class="nav-item" href="login.html" style="color:#9ca3af;">
+        <i class="fa-solid fa-right-from-bracket icon"></i> Sair
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── CONTEÚDO ── -->
+  <main class="page-main">
+
+    <!-- Breadcrumb -->
+    <div class="fade-up" style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;color:#9ca3af;margin-bottom:1.5rem;">
+      <a href="produtos-lista.html" style="color:#9ca3af;text-decoration:none;transition:color .2s;"
+         onmouseover="this.style.color='#C9546E'" onmouseout="this.style.color='#9ca3af'">Produtos</a>
+      <i class="fa-solid fa-chevron-right" style="font-size:.625rem;"></i>
+      <span style="color:#374151;font-weight:500;" id="breadcrumb-titulo">Novo produto</span>
+    </div>
+
+    <!-- Cabeçalho -->
+    <div class="fade-up" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h2 class="font-display" style="font-size:1.5rem;font-weight:600;color:#1f2937;" id="page-titulo">
+        Novo produto
+      </h2>
+      <a href="produtos-lista.html" class="btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Voltar
+      </a>
+    </div>
+
+    <!-- Formulário -->
+    <div class="card fade-up delay-1" style="max-width:680px;">
+
+      <!-- Campo oculto ID (para edição) -->
+      <input type="hidden" id="f-id">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+
+        <!-- Nome — ocupa 2 colunas -->
+        <div style="grid-column:1/-1;">
+          <label class="form-label">Nome do produto <span style="color:#C9546E;">*</span></label>
+          <input type="text" id="f-nome" placeholder="Ex: Torta de morango" class="form-input">
+          <span class="form-erro" id="err-nome"></span>
+        </div>
+
+        <!-- Preço -->
+        <div>
+          <label class="form-label">Preço unitário <span style="color:#C9546E;">*</span></label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);
+                         font-size:.875rem;color:#9ca3af;">R$</span>
+            <input type="number" id="f-preco" placeholder="0,00" class="form-input"
+                   style="padding-left:2.5rem;" step="0.01" min="0">
+          </div>
+          <span class="form-erro" id="err-preco"></span>
+        </div>
+
+        <!-- Categoria -->
+        <div>
+          <label class="form-label">Categoria <span style="color:#C9546E;">*</span></label>
+          <select id="f-categoria" class="form-input">
+            <option value="">Selecione...</option>
+            <option>Bolos</option>
+            <option>Tortas</option>
+            <option>Doces</option>
+            <option>Salgados</option>
+            <option>Bebidas</option>
+          </select>
+          <span class="form-erro" id="err-categoria"></span>
+        </div>
+
+        <!-- Descrição — ocupa 2 colunas -->
+        <div style="grid-column:1/-1;">
+          <label class="form-label">Descrição</label>
+          <textarea id="f-descricao" rows="3" placeholder="Descreva o produto..."
+                    class="form-input" style="resize:none;"></textarea>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <label class="form-label">Status</label>
+          <select id="f-ativo" class="form-input">
+            <option value="SIM">Ativo</option>
+            <option value="NAO">Inativo</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Rodapé do form -->
+      <div style="display:flex;align-items:center;gap:.75rem;margin-top:2rem;
+                  padding-top:1.5rem;border-top:1px solid #FFF0F4;">
+        <button class="btn-primary" onclick="salvar()">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar produto
+        </button>
+        <a href="produtos-lista.html" class="btn-secondary">Cancelar</a>
+        <span id="salvando" style="font-size:.75rem;color:#9ca3af;display:none;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Salvando...
+        </span>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden">
+  <i id="toast-icon" class="fa-solid fa-circle-check" style="color:#4A9B72;"></i>
+  <span id="toast-msg">Operação realizada!</span>
+</div>
+
+<style>
+  .form-label {
+    display: block;
+    font-size: .75rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: .375rem;
+  }
+  .form-erro {
+    font-size: .7rem;
+    color: #ef4444;
+    margin-top: .25rem;
+    display: block;
+  }
+  .form-input.invalid {
+    border-color: #fca5a5;
+    box-shadow: 0 0 0 2px rgba(252,165,165,.3);
+  }
+</style>
+
+<script src="js/app.js"></script>
+<script>
+  // ── Ler parâmetros da URL ────────────────────────────────────────
+  const params = new URLSearchParams(window.location.search);
+  const modo   = params.get('modo');   // 'novo' | 'editar'
+  const id     = params.get('id');
+
+  // ── Configurar título da página ─────────────────────────────────
+  if (modo === 'editar') {
+    document.getElementById('page-titulo').textContent    = 'Editar produto';
+    document.getElementById('breadcrumb-titulo').textContent = 'Editar produto';
+    document.title = 'Editar Produto — Rosas & Tortas';
+    carregarProduto(id);
+  }
+
+  // ── Carregar produto para edição ─────────────────────────────────
+  async function carregarProduto(produtoId) {
+    // ── Integrar com backend Go ──────────────────────────────────
+    // const res  = await fetch(`/api/produtos/${produtoId}`, {
+    //   headers: { Authorization: 'Bearer '+localStorage.getItem('token') }
+    // });
+    // const p = await res.json();
+    // ────────────────────────────────────────────────────────────
+
+    // Dados de exemplo (remover ao integrar)
+    const exemplos = {
+      1: { id:1, nome:'Torta de Morango',   categoria:'Tortas',   preco:89.90,  ativo:'SIM', descricao:'Torta artesanal de morango com chantilly.' },
+      2: { id:2, nome:'Bolo de Cenoura',    categoria:'Bolos',    preco:65.00,  ativo:'SIM', descricao:'Bolo de cenoura com cobertura de chocolate.' },
+    };
+    const p = exemplos[produtoId] || {};
+
+    document.getElementById('f-id').value        = p.id || '';
+    document.getElementById('f-nome').value      = p.nome || '';
+    document.getElementById('f-preco').value     = p.preco || '';
+    document.getElementById('f-categoria').value = p.categoria || '';
+    document.getElementById('f-descricao').value = p.descricao || '';
+    document.getElementById('f-ativo').value     = p.ativo || 'SIM';
+  }
+
+  // ── Validação ────────────────────────────────────────────────────
+  function validar() {
+    let ok = true;
+
+    const campos = [
+      { id:'f-nome',      err:'err-nome',      msg:'Informe o nome do produto.' },
+      { id:'f-preco',     err:'err-preco',     msg:'Informe o preço.' },
+      { id:'f-categoria', err:'err-categoria', msg:'Selecione uma categoria.' },
+    ];
+
+    campos.forEach(({ id, err, msg }) => {
+      const el  = document.getElementById(id);
+      const erEl = document.getElementById(err);
+      if (!el.value) {
+        el.classList.add('invalid');
+        erEl.textContent = msg;
+        ok = false;
+      } else {
+        el.classList.remove('invalid');
+        erEl.textContent = '';
+      }
+    });
+
+    return ok;
+  }
+
+  // ── Salvar ───────────────────────────────────────────────────────
+  async function salvar() {
+    if (!validar()) return;
+
+    const payload = {
+      id:        document.getElementById('f-id').value || null,
+      nome:      document.getElementById('f-nome').value,
+      preco_unitario: parseFloat(document.getElementById('f-preco').value),
+      categoria: document.getElementById('f-categoria').value,
+      descricao: document.getElementById('f-descricao').value,
+      ativo:     document.getElementById('f-ativo').value,
+    };
+
+    document.getElementById('salvando').style.display = 'inline-flex';
+
+    // ── Integrar com backend Go ──────────────────────────────────
+    // const url    = modo === 'editar' ? `/api/produtos/${payload.id}` : '/api/produtos';
+    // const method = modo === 'editar' ? 'PUT' : 'POST';
+    // const res    = await fetch(url, {
+    //   method,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: 'Bearer '+localStorage.getItem('token')
+    //   },
+    //   body: JSON.stringify(payload)
+    // });
+    // if (!res.ok) { showToast('Erro ao salvar.', 'erro'); return; }
+    // ────────────────────────────────────────────────────────────
+
+    // Simulação (remover ao integrar)
+    await new Promise(r => setTimeout(r, 800));
+    document.getElementById('salvando').style.display = 'none';
+
+    showToast(modo === 'editar' ? 'Produto atualizado!' : 'Produto cadastrado!');
+    setTimeout(() => window.location.href = 'produtos-lista.html', 1500);
+  }
+</script>
+</body>
+</html>
