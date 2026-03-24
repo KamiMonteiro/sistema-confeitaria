@@ -24,7 +24,7 @@
     }
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body class="min-h-screen petal-bg flex items-center justify-center px-4" data-page="login">
 
@@ -78,7 +78,7 @@
     </p>
   </div>
 
-  <script src="js/app.js"></script>
+  <script src="../js/app.js"></script>
   <script>
     async function fazerLogin() {
       const email = document.getElementById('login-email').value.trim();
@@ -90,14 +90,14 @@
       }
 
       // ── Integração com backend Go ──────────────────────────────
-      // const res  = await fetch('/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, senha })
-      // });
-      // const data = await res.json();
-      // if (!res.ok) { document.getElementById('login-erro').style.display = 'block'; return; }
-      // localStorage.setItem('token', data.token);
+      const res  = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha })
+      });
+      const data = await res.json();
+      if (!res.ok) { document.getElementById('login-erro').style.display = 'block'; return; }
+      localStorage.setItem('token', data.token);
       // ───────────────────────────────────────────────────────────
 
       window.location.href = 'dashboard.html';
