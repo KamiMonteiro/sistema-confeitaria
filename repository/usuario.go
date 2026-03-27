@@ -5,21 +5,65 @@ import (
 	"sistema-confeitaria/model"
 )
 
-func BuscarUsuarioPorEmail(db *sql.DB, email string) (*model.Usuario, error) {
+func CriarUsuario(db *sql.DB, u *model.Usuario) error {
 
-	query := `SELECT id_usuario, nome_usuario, cpf, email_usuario, senha FROM USUARIO WHERE email_usuario = ?`
+	query := `INSERT INTO USUARIO (nome_usuario, cpf, email_usuario, senha)
+	VALUES (?, ?, ?, ?)
+	`
 
-	row := db.QueryRow(query, email)
-
-	var u model.Usuario
-	err := row.Scan(
-		&u.ID,
-		&u.Nome,
-		&u.CPF,
-		&u.Email,
-		&u.Senha,
+	_, err := db.Exec(query,
+		u.Nome,
+		u.CPF,
+		u.Email,
+		u.Senha,
 	)
 
+	return err
+}
+
+func AtualizarUsuario(db *sql.DB, u *model.Usuario) error {
+
+	query := `
+	UPDATE USUARIO
+	SET nome_usuario = ?, email_usuario = ?, cpf = ?
+	WHERE id_usuario = ?
+	`
+
+	if u.Senha != "" {
+		query = `
+		UPDATE USUARIO
+		SET nome_usuario=?, email_usuario=?, cpf=?, senha=?
+		WHERE id_usuario=?
+		`
+	} else {
+		query = `
+		UPDATE USUARIO
+		SET nome_usuario=?, email_usuario=?, cpf=?
+		WHERE id_usuario=?
+		`
+	}
+
+	_, err := db.Exec(query,
+		u.Nome,
+		u.Email,
+		u.CPF,
+		u.ID,
+	)
+
+	return err
+}
+
+func BuscarUsuarioPorID(db *sql.DB, id int) (*model.Usuario, error) {
+	query := `
+	SELECT id_usuario, nome_usuario, cpf, email_usuario
+	FROM USUARIO
+	WHERE id_usuario = ?
+	`
+
+	row := db.QueryRow(query, id)
+
+	var u model.Usuario
+	err := row.Scan(&u.ID, &u.Nome, &u.CPF, &u.Email)
 	if err != nil {
 		return nil, err
 	}

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuário — Rosas & Tortas Confeitaria</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js" defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rose: { DEFAULT:'#F4A7B9', light:'#FAD4DE', dark:'#E8789A', deep:'#C9546E' },
+            mint: { DEFAULT:'#A8D5BA', light:'#D4EDE0', dark:'#6FBA96', deep:'#4A9B72' },
+          },
+          fontFamily: { display: ['Playfair Display','serif'] },
+          boxShadow: {
+            soft: '0 2px 16px rgba(244,167,185,0.15)',
+            card: '0 4px 24px rgba(200,120,140,0.10)',
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .form-label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 500;
+      color: #6b7280;
+      margin-bottom: .375rem;
+    }
+    .form-erro {
+      font-size: .7rem;
+      color: #ef4444;
+      margin-top: .25rem;
+      display: block;
+      min-height: 1rem;
+    }
+    .form-input.invalid {
+      border-color: #fca5a5;
+      box-shadow: 0 0 0 2px rgba(252,165,165,.3);
+    }
+    .senha-toggle {
+      position: absolute;
+      right: .75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #9ca3af;
+      padding: 0;
+      font-size: .875rem;
+      transition: color .2s;
+    }
+    .senha-toggle:hover { color: #C9546E; }
+    .section-title {
+      font-size: .7rem;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 1rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid #FFF0F4;
+    }
+  </style>
+</head>
+<body class="petal-bg" data-page="usuarios">
+
+<div class="page-layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span style="font-size:1.5rem;">🌹</span>
+      <div>
+        <p class="font-display" style="font-size:.875rem;font-weight:600;color:#1f2937;line-height:1.2;">Rosas & Tortas</p>
+        <p style="font-size:.7rem;color:#d1d5db;">Confeitaria</p>
+      </div>
+    </div>
+    <p class="sidebar-label">Menu</p>
+    <a class="nav-item" data-nav="dashboard"  href="dashboard.html"><i class="fa-solid fa-house-chimney icon"></i> Dashboard</a>
+    <a class="nav-item" data-nav="produtos"   href="produtos-lista.html"><i class="fa-solid fa-cake-candles icon"></i> Produtos</a>
+    <a class="nav-item" data-nav="clientes"   href="#"><i class="fa-solid fa-users icon"></i> Clientes</a>
+    <a class="nav-item" data-nav="pedidos"    href="#"><i class="fa-solid fa-bag-shopping icon"></i> Pedidos</a>
+    <a class="nav-item" data-nav="pagamentos" href="#"><i class="fa-solid fa-credit-card icon"></i> Formas de Pag.</a>
+    <a class="nav-item" data-nav="usuarios"   href="usuarios-lista.html"><i class="fa-solid fa-user-shield icon"></i> Usuários</a>
+    <div style="flex:1;"></div>
+    <div style="border-top:1px solid #FFF0F4;padding-top:.75rem;margin-top:.75rem;">
+      <a class="nav-item" href="login.html" style="color:#9ca3af;">
+        <i class="fa-solid fa-right-from-bracket icon"></i> Sair
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── CONTEÚDO ── -->
+  <main class="page-main">
+
+    <!-- Breadcrumb -->
+    <div class="fade-up" style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;color:#9ca3af;margin-bottom:1.5rem;">
+      <a href="usuarios-lista.html" style="color:#9ca3af;text-decoration:none;transition:color .2s;"
+         onmouseover="this.style.color='#C9546E'" onmouseout="this.style.color='#9ca3af'">Usuários</a>
+      <i class="fa-solid fa-chevron-right" style="font-size:.625rem;"></i>
+      <span style="color:#374151;font-weight:500;" id="breadcrumb-titulo">Novo usuário</span>
+    </div>
+
+    <!-- Cabeçalho -->
+    <div class="fade-up" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h2 class="font-display" style="font-size:1.5rem;font-weight:600;color:#1f2937;" id="page-titulo">
+        Novo usuário
+      </h2>
+      <a href="usuarios-lista.html" class="btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Voltar
+      </a>
+    </div>
+
+    <!-- Formulário -->
+    <div class="card fade-up delay-1" style="max-width:680px;">
+
+      <input type="hidden" id="f-id">
+
+      <!-- ── Seção: Dados pessoais ── -->
+      <p class="section-title"><i class="fa-solid fa-user" style="margin-right:.375rem;"></i>Dados pessoais</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.75rem;">
+
+        <!-- Nome — 2 colunas -->
+        <div style="grid-column:1/-1;">
+          <label class="form-label">Nome completo <span style="color:#C9546E;">*</span></label>
+          <input type="text" id="f-nome" placeholder="Ex: Maria Fernanda" class="form-input">
+          <span class="form-erro" id="err-nome"></span>
+        </div>
+
+        <!-- CPF -->
+        <div>
+          <label class="form-label">CPF <span style="color:#C9546E;">*</span></label>
+          <input type="text" id="f-cpf" placeholder="000.000.000-00" class="form-input"
+                 maxlength="14" oninput="mascaraCPF(this)">
+          <span class="form-erro" id="err-cpf"></span>
+        </div>
+
+      </div>
+
+      <!-- ── Seção: Acesso ao sistema ── -->
+      <p class="section-title"><i class="fa-solid fa-lock" style="margin-right:.375rem;"></i>Acesso ao sistema</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+
+        <!-- E-mail — 2 colunas -->
+        <div style="grid-column:1/-1;">
+          <label class="form-label">E-mail <span style="color:#C9546E;">*</span></label>
+          <input type="email" id="f-email" placeholder="usuario@loja.com" class="form-input">
+          <span class="form-erro" id="err-email"></span>
+        </div>
+
+        <!-- Senha -->
+        <div>
+          <label class="form-label" id="label-senha">
+            Senha <span style="color:#C9546E;" id="senha-obrig">*</span>
+          </label>
+          <div style="position:relative;">
+            <input type="password" id="f-senha" placeholder="Mínimo 6 caracteres" class="form-input"
+                   style="padding-right:2.5rem;">
+            <button type="button" class="senha-toggle" onclick="toggleSenha('f-senha','ico-senha1')">
+              <i id="ico-senha1" class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <span class="form-erro" id="err-senha"></span>
+        </div>
+
+        <!-- Confirmar senha -->
+        <div>
+          <label class="form-label" id="label-confirmar">
+            Confirmar senha <span style="color:#C9546E;" id="confirmar-obrig">*</span>
+          </label>
+          <div style="position:relative;">
+            <input type="password" id="f-confirmar" placeholder="Repita a senha" class="form-input"
+                   style="padding-right:2.5rem;">
+            <button type="button" class="senha-toggle" onclick="toggleSenha('f-confirmar','ico-senha2')">
+              <i id="ico-senha2" class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <span class="form-erro" id="err-confirmar"></span>
+        </div>
+
+        <!-- Dica de edição -->
+        <div id="dica-senha" style="grid-column:1/-1;display:none;
+             background:#FFF0F4;border-radius:.75rem;padding:.75rem 1rem;
+             font-size:.75rem;color:#9ca3af;display:none;">
+          <i class="fa-solid fa-circle-info" style="color:#F4A7B9;margin-right:.375rem;"></i>
+          Deixe os campos de senha em branco para manter a senha atual.
+        </div>
+
+      </div>
+
+      <!-- Rodapé -->
+      <div style="display:flex;align-items:center;gap:.75rem;margin-top:2rem;
+                  padding-top:1.5rem;border-top:1px solid #FFF0F4;">
+        <button class="btn-primary" onclick="salvar()">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar usuário
+        </button>
+        <a href="usuarios-lista.html" class="btn-secondary">Cancelar</a>
+        <span id="salvando" style="font-size:.75rem;color:#9ca3af;display:none;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Salvando...
+        </span>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden">
+  <i id="toast-icon" class="fa-solid fa-circle-check" style="color:#4A9B72;"></i>
+  <span id="toast-msg">Operação realizada!</span>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  // ── Parâmetros da URL ────────────────────────────────────────────
+  const params = new URLSearchParams(window.location.search);
+  const modo   = params.get('modo');  // 'novo' | 'editar'
+  const id     = params.get('id');
+
+  // ── Configurar modo edição ───────────────────────────────────────
+  if (modo === 'editar') {
+    document.getElementById('page-titulo').textContent       = 'Editar usuário';
+    document.getElementById('breadcrumb-titulo').textContent = 'Editar usuário';
+    document.title = 'Editar Usuário — Rosas & Tortas';
+
+    // Na edição, senha não é obrigatória
+    document.getElementById('senha-obrig').style.display    = 'none';
+    document.getElementById('confirmar-obrig').style.display = 'none';
+    document.getElementById('dica-senha').style.display     = 'flex';
+    document.getElementById('f-senha').placeholder          = 'Deixe em branco para manter';
+    document.getElementById('f-confirmar').placeholder      = 'Deixe em branco para manter';
+
+    carregarUsuario(id);
+  }
+
+  // ── Carregar usuário para edição ─────────────────────────────────
+  async function carregarUsuario(usuarioId) {
+  const res = await fetch(`/api/usuarios/${usuarioId}`);
+
+  if (!res.ok) {
+    alert("Erro ao carregar usuário");
+    return;
+  }
+
+  const u = await res.json();
+
+  document.getElementById('f-id').value    = u.id_usuario || '';
+  document.getElementById('f-nome').value  = u.nome_usuario || '';
+  document.getElementById('f-email').value = u.email_usuario || '';
+  document.getElementById('f-cpf').value   = u.cpf || '';
+  }
+
+  // ── Máscara CPF ──────────────────────────────────────────────────
+  function mascaraCPF(el) {
+    let v = el.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/,        '$1.$2.$3');
+    else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/,               '$1.$2');
+    el.value = v;
+  }
+
+  // ── Mostrar/ocultar senha ─────────────────────────────────────────
+  function toggleSenha(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(iconId);
+    if (input.type === 'password') {
+      input.type   = 'text';
+      icon.className = 'fa-solid fa-eye-slash';
+    } else {
+      input.type   = 'password';
+      icon.className = 'fa-solid fa-eye';
+    }
+  }
+
+  // ── Validação ────────────────────────────────────────────────────
+  function validar() {
+    let ok = true;
+
+    function checar(id, errId, msg, condicao) {
+      const el  = document.getElementById(id);
+      const err = document.getElementById(errId);
+      if (condicao(el.value)) {
+        el.classList.add('invalid');
+        err.textContent = msg;
+        ok = false;
+      } else {
+        el.classList.remove('invalid');
+        err.textContent = '';
+      }
+    }
+
+    checar('f-nome',  'err-nome',  'Informe o nome completo.', v => !v.trim());
+    checar('f-cpf',   'err-cpf',   'Informe o CPF.',           v => v.replace(/\D/g,'').length !== 11);
+    checar('f-email', 'err-email', 'Informe um e-mail válido.', v => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+
+    const senha     = document.getElementById('f-senha').value;
+    const confirmar = document.getElementById('f-confirmar').value;
+
+    if (modo !== 'editar' || senha) {
+      // Novo usuário: senha obrigatória / Editar com senha preenchida: validar
+      checar('f-senha', 'err-senha', 'A senha deve ter pelo menos 6 caracteres.', v => v.length < 6);
+
+      if (senha !== confirmar) {
+        const el = document.getElementById('f-confirmar');
+        el.classList.add('invalid');
+        document.getElementById('err-confirmar').textContent = 'As senhas não coincidem.';
+        ok = false;
+      } else {
+        document.getElementById('f-confirmar').classList.remove('invalid');
+        document.getElementById('err-confirmar').textContent = '';
+      }
+    }
+
+    return ok;
+  }
+
+  // ── Salvar ───────────────────────────────────────────────────────
+  async function salvar() {
+    if (!validar()) return;
+
+    const senha = document.getElementById('f-senha').value;
+
+    const payload = {
+      id:            document.getElementById('f-id').value || null,
+      nome_usuario:  document.getElementById('f-nome').value.trim(),
+      email_usuario: document.getElementById('f-email').value.trim(),
+      cpf:           document.getElementById('f-cpf').value,
+      ...(senha ? { senha } : {}),  // só envia senha se preenchida
+    };
+
+    document.getElementById('salvando').style.display = 'inline-flex';
+
+    // ── Integrar com backend Go ──────────────────────────────────
+     const url    = modo === 'editar' ? `/api/usuarios/${payload.id}` : '/api/usuarios';
+     const method = modo === 'editar' ? 'PUT' : 'POST';
+     const res    = await fetch(url, {
+       method,
+       headers: {
+         'Content-Type': 'application/json'
+       },
+       body: JSON.stringify(payload)
+     });
+     if (!res.ok) { showToast('Erro ao salvar.','erro'); document.getElementById('salvando').style.display='none'; return; }
+    // ────────────────────────────────────────────────────────────
+
+    // Simulação (remover ao integrar)
+    await new Promise(r => setTimeout(r, 700));
+    document.getElementById('salvando').style.display = 'none';
+
+    showToast(modo === 'editar' ? 'Usuário atualizado!' : 'Usuário cadastrado!');
+    setTimeout(() => window.location.href = 'usuarios-lista.html', 1500);
+  }
+</script>
+</body>
+</html>

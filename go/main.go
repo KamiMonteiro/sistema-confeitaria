@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"sistema-confeitaria/database"
 	"sistema-confeitaria/handler"
@@ -11,11 +10,17 @@ func main() {
 	db := database.ConnectDB()
 	defer db.Close()
 
-	log.Println("Aplicaçção está rodando...)")
-
 	database.RunMigrations(db)
 
-	http.HandleFunc("/api/auth/login", handler.Login(db))
+	// rota principal (POST e GET lista)
+	http.HandleFunc("/api/usuarios", handler.Usuarios(db))
+
+	// rota com ID (GET por ID e PUT)
+	http.HandleFunc("/api/usuarios/", handler.UsuarioPorID(db))
+
+	// servir frontend
+	fs := http.FileServer(http.Dir("./html"))
+	http.Handle("/", fs)
 
 	http.ListenAndServe(":8080", nil)
 }

@@ -7,7 +7,7 @@ import (
 
 func RunMigrations(db *sql.DB) {
 	createTable := `
-	CREATE TABLE USUARIO (
+	CREATE TABLE IF NOT EXISTS USUARIO (
 	id_usuario integer PRIMARY KEY,
 	nome_usuario varchar(100),
 	cpf char(14),
