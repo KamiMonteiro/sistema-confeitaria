@@ -12,11 +12,17 @@ func main() {
 
 	database.RunMigrations(db)
 
-	// rota principal (POST e GET lista)
-	http.HandleFunc("/api/usuarios", handler.Usuarios(db))
+	// rota principal (POST de ciração)
+	http.HandleFunc("/api/novo/usuario", handler.CriarUsuario(db))
 
-	// rota com ID (GET por ID e PUT)
-	http.HandleFunc("/api/usuarios/", handler.UsuarioPorID(db))
+	//GET para listar usuarios geral
+	http.HandleFunc("/api/todos/usuario", handler.BuscarTodosUsuario(db))
+
+	//GET para listar usuario por id
+	http.HandleFunc("/api/usuarios/listar/", handler.UsuarioPorID(db))
+
+	// rota com ID (PUT usuário)
+	http.HandleFunc("/api/atualizar/usuarios/{id}", handler.AtualizarUsuario(db))
 
 	// servir frontend
 	fs := http.FileServer(http.Dir("./html"))

@@ -8,17 +8,9 @@ import (
 	"sistema-confeitaria/repository"
 	"strconv"
 	"strings"
-
 )
 
-package handler
-
-import (
-	"database/sql"
-	"net/http"
-)
-
-func Usuarios(db *sql.DB) http.HandlerFunc {
+/*func Usuarios(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		switch r.Method {
@@ -29,16 +21,17 @@ func Usuarios(db *sql.DB) http.HandlerFunc {
 
 		case http.MethodGet:
 			// 👉 listar usuários (opcional por enquanto)
-			w.Write([]byte("Listagem de usuários"))
+			BuscarUsuario(db)(w, r)	
 
 		default:
 			http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 		}
 	}
-}
+}*/
 
 
-func CriarUsuario(db *sql.DB, w http.ResponseWriter, r *http.Request){
+func CriarUsuario(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 	var u model.Usuario
 
 	err := json.NewDecoder(r.Body).Decode(&u)
@@ -61,6 +54,7 @@ func CriarUsuario(db *sql.DB, w http.ResponseWriter, r *http.Request){
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
 }
 
 func AtualizarUsuario(db *sql.DB) http.HandlerFunc {
@@ -89,12 +83,46 @@ func AtualizarUsuario(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-func BuscarUsuario(db *sql.DB) http.HandlerFunc {
+func BuscarTodosUsuario(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		idStr := strings.TrimPrefix(r.URL.Path, "/api/usuarios/")
-		id, _ := strconv.Atoi(idStr)
+		idStr := strings.TrimPrefix(r.URL.Path, "/api/todos/usuario")
 
+
+		json.NewEncoder(w).Encode(repository.BuscarTodosUsuario(db, idStr))
+	}
+}
+
+func BuscarUsuarioPorID(db *sql.DB, id int) (*model.Usuario, error) {
+	query := `
+	SELECT id_usuario, nome_usuario, cpf, email_usuario
+	FROM USUARIO
+	WHERE id_usuario = ?
+	`
+
+	row := db.QueryRow(query, id)
+
+	var u model.Usuario
+	err := row.Scan(&u.ID, &u.Nome, &u.CPF, &u.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	return &u, nil
+}
+
+func UsuarioPorID(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// extrair ID da URL
+		idStr := strings.TrimPrefix(r.URL.Path, "/api/usuarios/listar/")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			http.Error(w, "ID inválido", http.StatusBadRequest)
+			return
+		}
+
+		// chamar repository
 		user, err := repository.BuscarUsuarioPorID(db, id)
 		if err != nil {
 			http.Error(w, "Usuário não encontrado", http.StatusNotFound)
@@ -102,24 +130,5 @@ func BuscarUsuario(db *sql.DB) http.HandlerFunc {
 		}
 
 		json.NewEncoder(w).Encode(user)
-	}
-}
-
-func UsuarioPorID(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		switch r.Method {
-
-		case http.MethodGet:
-			// buscar usuário por ID
-			BuscarUsuario(db, w, r)
-
-		case http.MethodPut:
-			// atualizar usuário
-			AtualizarUsuario(db, w, r)
-
-		default:
-			http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
-		}
 	}
 }
