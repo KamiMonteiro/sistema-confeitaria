@@ -70,3 +70,33 @@ func BuscarUsuarioPorID(db *sql.DB, id int) (*model.Usuario, error) {
 
 	return &u, nil
 }
+
+func BuscarTodosUsuario(db *sql.DB) ([]model.Usuario, error) {
+
+	query := `
+	SELECT id_usuario, nome_usuario, cpf, email_usuario
+	FROM USUARIO
+	ORDER BY nome_usuario ASC
+	`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var usuarios []model.Usuario
+
+	for rows.Next() {
+		var u model.Usuario
+
+		err := rows.Scan(&u.ID, &u.Nome, &u.CPF, &u.Email)
+		if err != nil {
+			return nil, err
+		}
+
+		usuarios = append(usuarios, u)
+	}
+
+	return usuarios, nil
+}

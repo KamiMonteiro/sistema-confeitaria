@@ -21,7 +21,7 @@ import (
 
 		case http.MethodGet:
 			// 👉 listar usuários (opcional por enquanto)
-			BuscarUsuario(db)(w, r)	
+			BuscarUsuario(db)(w, r)
 
 		default:
 			http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
@@ -29,32 +29,31 @@ import (
 	}
 }*/
 
-
 func CriarUsuario(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-	var u model.Usuario
+		var u model.Usuario
 
-	err := json.NewDecoder(r.Body).Decode(&u)
-	if err != nil {
-		http.Error(w, "JSON inválido", http.StatusBadRequest)
-		return
+		err := json.NewDecoder(r.Body).Decode(&u)
+		if err != nil {
+			http.Error(w, "JSON inválido", http.StatusBadRequest)
+			return
+		}
+
+		// validação simples
+		if u.Nome == "" || u.Email == "" || u.Senha == "" {
+			http.Error(w, "Campos obrigatórios", http.StatusBadRequest)
+			return
+		}
+
+		// salvar no banco
+		err = repository.CriarUsuario(db, &u)
+		if err != nil {
+			http.Error(w, "Erro ao salvar", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
 	}
-
-	// validação simples
-	if u.Nome == "" || u.Email == "" || u.Senha == "" {
-		http.Error(w, "Campos obrigatórios", http.StatusBadRequest)
-		return
-	}
-
-	// salvar no banco
-	err = repository.CriarUsuario(db, &u)
-	if err != nil {
-		http.Error(w, "Erro ao salvar", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-}
 }
 
 func AtualizarUsuario(db *sql.DB) http.HandlerFunc {
@@ -86,10 +85,13 @@ func AtualizarUsuario(db *sql.DB) http.HandlerFunc {
 func BuscarTodosUsuario(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		idStr := strings.TrimPrefix(r.URL.Path, "/api/todos/usuario")
+		usuarios, err := repository.BuscarTodosUsuario(db)
+		if err != nil {
+			http.Error(w, "Erro ao buscar usuários", http.StatusInternalServerError)
+			return
+		}
 
-
-		json.NewEncoder(w).Encode(repository.BuscarTodosUsuario(db, idStr))
+		json.NewEncoder(w).Encode(usuarios)
 	}
 }
 

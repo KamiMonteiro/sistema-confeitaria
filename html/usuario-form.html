@@ -199,12 +199,12 @@
       </div>
 
       <!-- Rodapé -->
-      <div style="display:flex;align-items:center;gap:.75rem;margin-top:2rem;
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-top:2rem;
                   padding-top:1.5rem;border-top:1px solid #FFF0F4;">
+        <a href="usuarios-lista.html" class="btn-secondary">Cancelar</a>
         <button class="btn-primary" onclick="salvar()">
           <i class="fa-solid fa-floppy-disk"></i> Salvar usuário
         </button>
-        <a href="usuarios-lista.html" class="btn-secondary">Cancelar</a>
         <span id="salvando" style="font-size:.75rem;color:#9ca3af;display:none;">
           <i class="fa-solid fa-spinner fa-spin"></i> Salvando...
         </span>
@@ -245,7 +245,7 @@
 
   // ── Carregar usuário para edição ─────────────────────────────────
   async function carregarUsuario(usuarioId) {
-  const res = await fetch(`/api/usuarios/${usuarioId}`);
+  const res = await fetch(`http://localhost:8080/api/usuarios/listar/${usuarioId}`);
 
   if (!res.ok) {
     alert("Erro ao carregar usuário");
@@ -326,12 +326,12 @@
 
   // ── Salvar ───────────────────────────────────────────────────────
   async function salvar() {
-    if (!validar()) return;
+    //if (!validar()) return;
 
     const senha = document.getElementById('f-senha').value;
 
     const payload = {
-      id:            document.getElementById('f-id').value || null,
+      id_usuario:    parseInt(document.getElementById('f-id').value) || null,
       nome_usuario:  document.getElementById('f-nome').value.trim(),
       email_usuario: document.getElementById('f-email').value.trim(),
       cpf:           document.getElementById('f-cpf').value,
@@ -341,7 +341,7 @@
     document.getElementById('salvando').style.display = 'inline-flex';
 
     // ── Integrar com backend Go ──────────────────────────────────
-     const url    = modo === 'editar' ? `/api/usuarios/${payload.id}` : '/api/usuarios';
+     const url    = modo === 'editar' ? `http://localhost:8080/api/atualizar/usuarios` : 'http://localhost:8080/api/novo/usuario';
      const method = modo === 'editar' ? 'PUT' : 'POST';
      const res    = await fetch(url, {
        method,
