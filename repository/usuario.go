@@ -53,6 +53,16 @@ func AtualizarUsuario(db *sql.DB, u *model.Usuario) error {
 	return err
 }
 
+func ExcluirUsuario(db *sql.DB, id int) error {
+	query := `
+	DELETE FROM USUARIO
+	WHERE id_usuario = ?
+	`
+
+	_, err := db.Exec(query, id)
+	return err
+}
+
 func BuscarUsuarioPorID(db *sql.DB, id int) (*model.Usuario, error) {
 	query := `
 	SELECT id_usuario, nome_usuario, cpf, email_usuario

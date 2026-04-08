@@ -47,6 +47,9 @@ func main() {
 	//GET para listar usuario por id
 	http.HandleFunc("/api/usuarios/listar/", corsHandler(handler.UsuarioPorID(db)))
 
+	// DELETE para excluir usuário por id
+	http.HandleFunc("/api/usuarios/excluir/", corsHandler(handler.ExcluirUsuario(db)))
+
 	// rota com ID (PUT usuário)
 	http.HandleFunc("/api/atualizar/usuarios", corsHandler(handler.AtualizarUsuario(db)))
 

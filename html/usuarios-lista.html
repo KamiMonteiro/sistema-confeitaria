@@ -73,11 +73,6 @@
          style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-bottom:1.25rem;padding:1rem;">
       <input id="filtro-nome" type="text" placeholder="🔍  Buscar por nome ou e-mail..." class="form-input"
              style="max-width:260px;" oninput="filtrar()">
-      <select id="filtro-ativo" class="form-input" style="max-width:130px;" onchange="filtrar()">
-        <option value="">Status</option>
-        <option value="SIM">Ativo</option>
-        <option value="NAO">Inativo</option>
-      </select>
       <button class="btn-mint" onclick="filtrar()">
         <i class="fa-solid fa-magnifying-glass"></i> Filtrar
       </button>
@@ -120,7 +115,7 @@
       <i class="fa-solid fa-trash-can" style="font-size:1.25rem;color:#C9546E;"></i>
     </div>
     <h3 class="font-display" style="font-size:1.125rem;font-weight:600;color:#1f2937;margin-bottom:.5rem;">
-      Excluir usuário?
+      Excluir usuário <span id="modal-usuario-nome" style="font-weight:700;color:#C9546E;"></span>?
     </h3>
     <p style="font-size:.875rem;color:#9ca3af;margin-bottom:1.5rem;">
       Esta ação não pode ser desfeita.
@@ -140,7 +135,7 @@
   <span id="toast-msg">Operação realizada!</span>
 </div>
 
-<script src="js/app.js"></script>
+<script src="../js/app.js"></script>
 <script>
   // ── Dados de exemplo (remover ao integrar) ───────────────────────
   let usuarios = [];
@@ -154,7 +149,8 @@
   async function carregarUsuarios() {
     const res   = await fetch('http://localhost:8080/api/todos/usuario');
     usuarios    = await res.json();
-    renderTabela(usuarios);
+    usuariosFiltrados = [...usuarios];
+    renderTabela(usuariosFiltrados);
   }
   
   carregarUsuarios();
@@ -234,19 +230,21 @@
 
   // ── Filtros ──────────────────────────────────────────────────────
   function filtrar() {
-    const texto = document.getElementById('filtro-nome').value.toLowerCase();
-    usuariosFiltrados = usuarios.filter(u =>
-      !texto ||
-      u.nome_usuario.toLowerCase().includes(texto) ||
-      u.email_usuario.toLowerCase().includes(texto)
-    );
+    const texto = document.getElementById('filtro-nome').value.trim().toLowerCase();
+
+    usuariosFiltrados = usuarios.filter(u => {
+      const matchesTexto = !texto ||
+        u.nome_usuario.toLowerCase().includes(texto) ||
+        u.email_usuario.toLowerCase().includes(texto);
+      return matchesTexto;
+    });
+
     paginaAtual = 1;
     renderTabela(usuariosFiltrados);
   }
 
   function limparFiltros() {
-    document.getElementById('filtro-nome').value  = '';
-    document.getElementById('filtro-ativo').value = '';
+    document.getElementById('filtro-nome').value = '';
     usuariosFiltrados = [...usuarios];
     paginaAtual = 1;
     renderTabela(usuariosFiltrados);
@@ -255,18 +253,23 @@
   // ── Exclusão ─────────────────────────────────────────────────────
   function pedirExclusao(id) {
     idParaExcluir = id;
+    const usuario = usuarios.find(u => u.id_usuario === id);
+    document.getElementById('modal-usuario-nome').textContent = usuario ? usuario.nome_usuario : '';
     abrirModal('modal-excluir');
   }
 
   async function confirmarExclusao() {
     fecharModal('modal-excluir');
 
-    // ── Integrar com backend Go ──────────────────────────────────
-    // await fetch(`/api/usuarios/${idParaExcluir}`, {
-    //   method: 'DELETE',
-    //   headers: { Authorization: 'Bearer '+localStorage.getItem('token') }
-    // });
-    // ────────────────────────────────────────────────────────────
+    const res = await fetch(`http://localhost:8080/api/usuarios/excluir/${idParaExcluir}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!res.ok) {
+      showToast('Erro ao excluir usuário.', 'erro');
+      return;
+    }
 
     usuarios = usuarios.filter(u => u.id_usuario !== idParaExcluir);
     usuariosFiltrados = usuariosFiltrados.filter(u => u.id_usuario !== idParaExcluir);

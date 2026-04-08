@@ -95,6 +95,30 @@ func BuscarTodosUsuario(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+func ExcluirUsuario(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			http.Error(w, "Método inválido", http.StatusMethodNotAllowed)
+			return
+		}
+
+		idStr := strings.TrimPrefix(r.URL.Path, "/api/usuarios/excluir/")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			http.Error(w, "ID inválido", http.StatusBadRequest)
+			return
+		}
+
+		err = repository.ExcluirUsuario(db, id)
+		if err != nil {
+			http.Error(w, "Erro ao excluir usuário", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func BuscarUsuarioPorID(db *sql.DB, id int) (*model.Usuario, error) {
 	query := `
 	SELECT id_usuario, nome_usuario, cpf, email_usuario
