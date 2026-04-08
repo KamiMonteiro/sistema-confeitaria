@@ -134,3 +134,32 @@ func UsuarioPorID(db *sql.DB) http.HandlerFunc {
 		json.NewEncoder(w).Encode(user)
 	}
 }
+
+func Login(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var creds struct {
+			Email string `json:"email"`
+			Senha string `json:"senha"`
+		}
+
+		err := json.NewDecoder(r.Body).Decode(&creds)
+		if err != nil {
+			http.Error(w, "JSON inválido", http.StatusBadRequest)
+			return
+		}
+
+		user, err := repository.AutenticarUsuario(db, creds.Email, creds.Senha)
+		if err != nil {
+			http.Error(w, "Credenciais inválidas", http.StatusUnauthorized)
+			return
+		}
+
+		// Retornar token dummy e dados do usuário
+		response := map[string]interface{}{
+			"token": "dummy-token-" + strconv.Itoa(user.ID),
+			"user":  user,
+		}
+
+		json.NewEncoder(w).Encode(response)
+	}
+}

@@ -100,3 +100,21 @@ func BuscarTodosUsuario(db *sql.DB) ([]model.Usuario, error) {
 
 	return usuarios, nil
 }
+
+func AutenticarUsuario(db *sql.DB, email, senha string) (*model.Usuario, error) {
+	query := `
+	SELECT id_usuario, nome_usuario, cpf, email_usuario
+	FROM USUARIO
+	WHERE email_usuario = ? AND senha = ?
+	`
+
+	row := db.QueryRow(query, email, senha)
+
+	var u model.Usuario
+	err := row.Scan(&u.ID, &u.Nome, &u.CPF, &u.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	return &u, nil
+}

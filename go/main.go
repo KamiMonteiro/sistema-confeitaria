@@ -50,6 +50,9 @@ func main() {
 	// rota com ID (PUT usuário)
 	http.HandleFunc("/api/atualizar/usuarios", corsHandler(handler.AtualizarUsuario(db)))
 
+	// rota de login
+	http.HandleFunc("/api/auth/login", corsHandler(handler.Login(db)))
+
 	// servir frontend
 	fs := http.FileServer(http.Dir("./html"))
 	http.Handle("/", corsMiddleware(fs))
