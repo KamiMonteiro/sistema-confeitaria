@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Produtos — Rosas & Tortas Confeitaria</title>
+  <title>Formas de Pagamento — Rosas & Tortas Confeitaria</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js" defer></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/styles.css">
 </head>
-<body class="petal-bg" data-page="produtos">
+<body class="petal-bg" data-page="pagamentos">
 
 <div class="page-layout">
 
@@ -41,11 +41,11 @@
     </div>
     <p class="sidebar-label">Menu</p>
     <a class="nav-item" data-nav="dashboard" href="dashboard.html"><i class="fa-solid fa-house-chimney icon"></i> Dashboard</a>
-    <a class="nav-item" data-nav="produtos"   href="produtos-lista.html"><i class="fa-solid fa-cake-candles icon"></i> Produtos</a>
-    <a class="nav-item" data-nav="clientes"   href="#"><i class="fa-solid fa-users icon"></i> Clientes</a>
-    <a class="nav-item" data-nav="pedidos"    href="#"><i class="fa-solid fa-bag-shopping icon"></i> Pedidos</a>
-    <a class="nav-item" data-nav="pagamentos" href="#"><i class="fa-solid fa-credit-card icon"></i> Formas de Pagamento</a>
-    <a class="nav-item" data-nav="usuarios"   href="#"><i class="fa-solid fa-user-shield icon"></i> Usuários</a>
+    <a class="nav-item" data-nav="produtos" href="produtos-lista.html"><i class="fa-solid fa-cake-candles icon"></i> Produtos</a>
+    <a class="nav-item" data-nav="clientes" href="#"><i class="fa-solid fa-users icon"></i> Clientes</a>
+    <a class="nav-item" data-nav="pedidos" href="#"><i class="fa-solid fa-bag-shopping icon"></i> Pedidos</a>
+    <a class="nav-item" data-nav="pagamentos" href="pagamentos-lista.html"><i class="fa-solid fa-credit-card icon"></i> Formas de Pagamento</a>
+    <a class="nav-item" data-nav="usuarios" href="usuarios-lista.html"><i class="fa-solid fa-user-shield icon"></i> Usuários</a>
     <div style="flex:1;"></div>
     <div style="border-top:1px solid #FFF0F4;padding-top:.75rem;margin-top:.75rem;">
       <a class="nav-item" href="login.html" style="color:#9ca3af;">
@@ -60,34 +60,29 @@
     <!-- Header -->
     <div class="fade-up" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
       <div>
-        <h2 class="font-display" style="font-size:1.5rem;font-weight:600;color:#1f2937;">Produtos</h2>
-        <p style="font-size:.875rem;color:#9ca3af;margin-top:.25rem;">Gerencie o catálogo da confeitaria</p>
+        <h2 class="font-display" style="font-size:1.5rem;font-weight:600;color:#1f2937;">Formas de Pagamento</h2>
+        <p style="font-size:.875rem;color:#9ca3af;margin-top:.25rem;">Gerencie as formas de pagamento do sistema</p>
       </div>
-      <a class="btn-primary" href="produto-form.html?modo=novo">
-        <i class="fa-solid fa-plus"></i> Novo produto
+      <a class="btn-primary" href="pagamento-form.html?modo=novo">
+        <i class="fa-solid fa-plus"></i> Nova forma
       </a>
     </div>
 
-    <!-- Filtros -->
+    <!-- Busca por ID e filtro de status -->
     <div class="card fade-up delay-1"
          style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-bottom:1.25rem;padding:1rem;">
-      <input id="filtro-nome" type="text" placeholder="🔍  Buscar produto..." class="form-input"
-             style="max-width:220px;" oninput="filtrar()">
-      <select id="filtro-cat" class="form-input" style="max-width:170px;" onchange="filtrar()">
-        <option value="">Todas categorias</option>
-        <option>Bolos</option><option>Tortas</option><option>Doces</option>
-        <option>Salgados</option><option>Bebidas</option>
-      </select>
-      <select id="filtro-ativo" class="form-input" style="max-width:130px;" onchange="filtrar()">
+      <input id="filtro-id" type="text" placeholder="🔍  Buscar por ID..." class="form-input"
+             style="max-width:260px;">
+      <select id="filtro-status" class="form-input" style="max-width:130px;" onchange="filtrarStatus()">
         <option value="">Status</option>
         <option value="SIM">Ativo</option>
         <option value="NAO">Inativo</option>
       </select>
-      <button class="btn-mint" onclick="filtrar()">
-        <i class="fa-solid fa-magnifying-glass"></i> Filtrar
+      <button class="btn-mint" onclick="buscarForma()">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
       </button>
-      <button class="btn-secondary" onclick="limparFiltros()">
-        <i class="fa-solid fa-xmark"></i> Limpar
+      <button class="btn-secondary" onclick="mostrarTodos()">
+        <i class="fa-solid fa-list"></i> Mostrar todos
       </button>
     </div>
 
@@ -96,15 +91,12 @@
       <table class="tbl">
         <thead>
           <tr>
-            <th>ID</th>
             <th>Nome</th>
-            <th>Categoria</th>
-            <th>Preço Unit.</th>
             <th>Status</th>
             <th style="text-align:center;">Ações</th>
           </tr>
         </thead>
-        <tbody id="tbody-produtos"></tbody>
+        <tbody id="tbody-pagamentos"></tbody>
       </table>
 
       <!-- Paginação -->
@@ -127,8 +119,11 @@
       <i class="fa-solid fa-trash-can" style="font-size:1.25rem;color:#C9546E;"></i>
     </div>
     <h3 class="font-display" style="font-size:1.125rem;font-weight:600;color:#1f2937;margin-bottom:.5rem;">
-      Excluir produto?
+      Excluir forma de pagamento?
     </h3>
+    <p style="font-size:.95rem;color:#1f2937;font-weight:600;margin-bottom:.5rem;" id="nome-pagamento-exclusao">
+      <!-- Nome será inserido aqui -->
+    </p>
     <p style="font-size:.875rem;color:#9ca3af;margin-bottom:1.5rem;">
       Esta ação não pode ser desfeita.
     </p>
@@ -149,49 +144,30 @@
 
 <script src="../js/app.js"></script>
 <script>
-  // ── Dados de exemplo (remover ao integrar) ───────────────────────
-  let produtos = [
-    { id:1, nome:'Torta de Morango',   categoria:'Tortas',   preco:89.90,  ativo:'SIM' },
-    { id:2, nome:'Bolo de Cenoura',    categoria:'Bolos',    preco:65.00,  ativo:'SIM' },
-    { id:3, nome:'Brigadeiro Gourmet', categoria:'Doces',    preco:4.50,   ativo:'SIM' },
-    { id:4, nome:'Cheesecake',         categoria:'Tortas',   preco:110.00, ativo:'SIM' },
-    { id:5, nome:'Pão de Mel',         categoria:'Doces',    preco:7.00,   ativo:'NAO' },
-    { id:6, nome:'Quiche Lorraine',    categoria:'Salgados', preco:45.00,  ativo:'SIM' },
-  ];
-
-  // ── Integração com backend Go ────────────────────────────────────
-  // async function carregarProdutos() {
-  //   const res  = await fetch('/api/produtos', { headers:{ Authorization:'Bearer '+localStorage.getItem('token') }});
-  //   produtos   = await res.json();
-  //   renderTabela(produtos);
-  // }
-  // carregarProdutos();
-
-  // ── Estado paginação ─────────────────────────────────────────────
+  let formas = [];
   const POR_PAGINA = 10;
-  let   paginaAtual = 1;
-  let   produtosFiltrados = [...produtos];
-  let   idParaExcluir = null;
+  let paginaAtual = 1;
+  let formasFiltradas = [];
+  let idParaExcluir = null;
+  let nomeParaExcluir = '';
 
-  // ── Render ───────────────────────────────────────────────────────
   function renderTabela(lista) {
     const inicio = (paginaAtual - 1) * POR_PAGINA;
     const pagina = lista.slice(inicio, inicio + POR_PAGINA);
 
-    document.getElementById('tbody-produtos').innerHTML = pagina.map(p => `
+    document.getElementById('tbody-pagamentos').innerHTML = pagina.map(f => {
+      const ativoAtivo = ['SIM', 'S'].includes(String(f.ativo).toUpperCase());
+      return `
       <tr>
-        <td style="color:#9ca3af;">#${p.id}</td>
-        <td style="font-weight:500;color:#1f2937;">${p.nome}</td>
-        <td>${p.categoria}</td>
-        <td>${formatarMoeda(p.preco)}</td>
+        <td style="font-weight:500;color:#1f2937;">${f.nome}</td>
         <td>
-          <span class="badge ${p.ativo==='SIM' ? 'badge-green' : 'badge-gray'}">
-            ${p.ativo==='SIM' ? 'Ativo' : 'Inativo'}
+          <span class="badge ${ativoAtivo ? 'badge-green' : 'badge-gray'}">
+            ${ativoAtivo ? 'Ativa' : 'Inativa'}
           </span>
         </td>
         <td style="text-align:center;">
           <div style="display:inline-flex;gap:.25rem;">
-            <a href="produto-form.html?modo=editar&id=${p.id}"
+            <a href="pagamento-form.html?modo=editar&id=${f.id}"
                style="display:inline-flex;align-items:center;justify-content:center;
                       width:2rem;height:2rem;border-radius:.5rem;color:#E8789A;
                       background:transparent;border:none;cursor:pointer;transition:background .2s;"
@@ -199,7 +175,7 @@
                title="Editar">
               <i class="fa-solid fa-pen-to-square" style="font-size:.875rem;"></i>
             </a>
-            <button onclick="pedirExclusao(${p.id})"
+            <button onclick="pedirExclusao(${f.id}, ${JSON.stringify(f.nome)})"
                     style="display:inline-flex;align-items:center;justify-content:center;
                            width:2rem;height:2rem;border-radius:.5rem;color:#d1d5db;
                            background:transparent;border:none;cursor:pointer;transition:all .2s;"
@@ -211,11 +187,11 @@
           </div>
         </td>
       </tr>
-    `).join('') || '<tr><td colspan="6" style="text-align:center;color:#9ca3af;padding:2rem;">Nenhum produto encontrado.</td></tr>';
+      `;
+    }).join('') || '<tr><td colspan="3" style="text-align:center;color:#9ca3af;padding:2rem;">Nenhuma forma de pagamento encontrada.</td></tr>';
 
-    // Paginação
-    const total  = lista.length;
-    const paginas = Math.ceil(total / POR_PAGINA);
+    const total = lista.length;
+    const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
     document.getElementById('pag-info').textContent =
       `Mostrando ${Math.min(inicio+1,total)}–${Math.min(inicio+POR_PAGINA,total)} de ${total} registros`;
 
@@ -227,58 +203,119 @@
       btn.style.cssText = `padding:.25rem .625rem;border-radius:.5rem;font-size:.75rem;border:none;cursor:pointer;
                            background:${i===paginaAtual?'#FAD4DE':'transparent'};
                            color:${i===paginaAtual?'#C9546E':'#9ca3af'};font-weight:${i===paginaAtual?'600':'400'};`;
-      btn.onclick = () => { paginaAtual = i; renderTabela(produtosFiltrados); };
+      btn.onclick = () => { paginaAtual = i; renderTabela(formasFiltradas); };
       botoes.appendChild(btn);
     }
   }
 
-  // ── Filtros ──────────────────────────────────────────────────────
-  function filtrar() {
-    const nome  = document.getElementById('filtro-nome').value.toLowerCase();
-    const cat   = document.getElementById('filtro-cat').value;
-    const ativo = document.getElementById('filtro-ativo').value;
-    produtosFiltrados = produtos.filter(p =>
-      (!nome  || p.nome.toLowerCase().includes(nome)) &&
-      (!cat   || p.categoria === cat) &&
-      (!ativo || p.ativo === ativo)
-    );
-    paginaAtual = 1;
-    renderTabela(produtosFiltrados);
+  async function buscarForma() {
+    const id = document.getElementById('filtro-id').value.trim();
+    if (!id) {
+      filtrarStatus();
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:8080/api/pagamento/listar/${id}`);
+      if (!res.ok) {
+        formasFiltradas = [];
+        renderTabela(formasFiltradas);
+        showToast('Forma de pagamento não encontrada.', 'erro');
+        return;
+      }
+
+      const f = await res.json();
+      formasFiltradas = [{
+        id: f.id_forma_pagamento,
+        nome: f.descricao,
+        ativo: f.ativo,
+      }];
+      paginaAtual = 1;
+      renderTabela(formasFiltradas);
+    } catch (error) {
+      showToast('Erro ao buscar forma de pagamento.', 'erro');
+    }
   }
 
-  function limparFiltros() {
-    document.getElementById('filtro-nome').value  = '';
-    document.getElementById('filtro-cat').value   = '';
-    document.getElementById('filtro-ativo').value = '';
-    produtosFiltrados = [...produtos];
+  function filtrarStatus() {
+    const status = document.getElementById('filtro-status').value;
+    const id = document.getElementById('filtro-id').value.trim();
+
+    if (id) {
+      buscarForma();
+      return;
+    }
+
+    const statusNormalizado = status === 'SIM' ? 'S' : status === 'NAO' ? 'N' : '';
+    formasFiltradas = statusNormalizado
+      ? formas.filter(f => String(f.ativo).toUpperCase() === statusNormalizado)
+      : [...formas];
     paginaAtual = 1;
-    renderTabela(produtosFiltrados);
+    renderTabela(formasFiltradas);
   }
 
-  // ── Exclusão ─────────────────────────────────────────────────────
-  function pedirExclusao(id) {
+  function mostrarTodos() {
+    document.getElementById('filtro-id').value = '';
+    document.getElementById('filtro-status').value = '';
+    formasFiltradas = [...formas];
+    paginaAtual = 1;
+    renderTabela(formasFiltradas);
+  }
+
+  async function carregarFormas() {
+    try {
+      const res = await fetch('http://localhost:8080/api/todos/pagamento');
+      if (!res.ok) {
+        showToast('Não foi possível carregar as formas de pagamento.', 'erro');
+        return;
+      }
+
+      const dados = await res.json();
+      formas = dados.map(f => ({
+        id: f.id_forma_pagamento,
+        nome: f.descricao,
+        ativo: f.ativo,
+      }));
+      formasFiltradas = [...formas];
+      paginaAtual = 1;
+      renderTabela(formasFiltradas);
+    } catch (error) {
+      showToast('Erro ao carregar formas de pagamento.', 'erro');
+    }
+  }
+
+  function pedirExclusao(id, nome) {
     idParaExcluir = id;
+    nomeParaExcluir = nome || '';
+    document.getElementById('nome-pagamento-exclusao').textContent = nomeParaExcluir
+      ? `Forma: ${nomeParaExcluir}`
+      : 'Forma de pagamento selecionada.';
     abrirModal('modal-excluir');
   }
 
   async function confirmarExclusao() {
     fecharModal('modal-excluir');
 
-    // ── Integrar com backend Go ──────────────────────────────────
-    // await fetch(`/api/produtos/${idParaExcluir}`, {
-    //   method: 'DELETE',
-    //   headers: { Authorization: 'Bearer '+localStorage.getItem('token') }
-    // });
-    // ────────────────────────────────────────────────────────────
+    try {
+      const res = await fetch(`http://localhost:8080/api/pagamento/excluir/${idParaExcluir}`, {
+        method: 'DELETE',
+      });
 
-    produtos = produtos.filter(p => p.id !== idParaExcluir);
-    produtosFiltrados = produtosFiltrados.filter(p => p.id !== idParaExcluir);
-    renderTabela(produtosFiltrados);
-    showToast('Produto excluído com sucesso.');
+      if (!res.ok) {
+        showToast('Erro ao excluir forma de pagamento.', 'erro');
+        return;
+      }
+
+      formas = formas.filter(f => f.id !== idParaExcluir);
+      formasFiltradas = formasFiltradas.filter(f => f.id !== idParaExcluir);
+      renderTabela(formasFiltradas);
+      showToast('Forma de pagamento excluída com sucesso.');
+    } catch (error) {
+      showToast('Erro de conexão ao excluir.', 'erro');
+    }
   }
 
-  // ── Init ─────────────────────────────────────────────────────────
-  renderTabela(produtos);
+  carregarFormas();
 </script>
 </body>
 </html>

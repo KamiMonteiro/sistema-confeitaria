@@ -38,8 +38,18 @@ func main() {
 
 	database.RunMigrations(db)
 
-	// rota principal (POST de ciração)
+	// rota principal (POST de criação)
 	http.HandleFunc("/api/novo/usuario", corsHandler(handler.CriarUsuario(db)))
+	// rota de cadastro de forma de pagamento
+	http.HandleFunc("/api/novo/pagamento", corsHandler(handler.CriarPagamento(db)))
+	// rota de atualização de forma de pagamento
+	http.HandleFunc("/api/atualizar/pagamento", corsHandler(handler.AtualizarPagamento(db)))
+	// rota de consulta de forma de pagamento por id
+	http.HandleFunc("/api/pagamento/listar/", corsHandler(handler.ConsultarPagamento(db)))
+	// rota para excluir forma de pagamento por id
+	http.HandleFunc("/api/pagamento/excluir/", corsHandler(handler.ExcluirPagamento(db)))
+	// rota para listar todas as formas de pagamento
+	http.HandleFunc("/api/todos/pagamento", corsHandler(handler.BuscarTodasFormasPagamento(db)))
 
 	//GET para listar usuarios geral
 	http.HandleFunc("/api/todos/usuario", corsHandler(handler.BuscarTodosUsuario(db)))

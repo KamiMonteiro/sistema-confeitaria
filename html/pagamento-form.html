@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forma de Pagamento — Rosas & Tortas Confeitaria</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js" defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rose: { DEFAULT:'#F4A7B9', light:'#FAD4DE', dark:'#E8789A', deep:'#C9546E' },
+            mint: { DEFAULT:'#A8D5BA', light:'#D4EDE0', dark:'#6FBA96', deep:'#4A9B72' },
+          },
+          fontFamily: { display: ['Playfair Display','serif'] },
+          boxShadow: {
+            soft: '0 2px 16px rgba(244,167,185,0.15)',
+            card: '0 4px 24px rgba(200,120,140,0.10)',
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .form-label { display:block; font-size:.75rem; font-weight:500; color:#6b7280; margin-bottom:.375rem; }
+    .form-erro { font-size:.7rem; color:#ef4444; margin-top:.25rem; display:block; min-height:1rem; }
+    .form-input.invalid { border-color:#fca5a5; box-shadow:0 0 0 2px rgba(252,165,165,.3); }
+  </style>
+</head>
+<body class="petal-bg" data-page="pagamentos">
+
+<div class="page-layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span style="font-size:1.5rem;">🌹</span>
+      <div>
+        <p class="font-display" style="font-size:.875rem;font-weight:600;color:#1f2937;line-height:1.2;">Rosas & Tortas</p>
+        <p style="font-size:.7rem;color:#d1d5db;">Confeitaria</p>
+      </div>
+    </div>
+    <p class="sidebar-label">Menu</p>
+    <a class="nav-item" data-nav="dashboard" href="dashboard.html"><i class="fa-solid fa-house-chimney icon"></i> Dashboard</a>
+    <a class="nav-item" data-nav="produtos" href="produtos-lista.html"><i class="fa-solid fa-cake-candles icon"></i> Produtos</a>
+    <a class="nav-item" data-nav="clientes" href="#"><i class="fa-solid fa-users icon"></i> Clientes</a>
+    <a class="nav-item" data-nav="pedidos" href="#"><i class="fa-solid fa-bag-shopping icon"></i> Pedidos</a>
+    <a class="nav-item" data-nav="pagamentos" href="pagamentos-lista.html"><i class="fa-solid fa-credit-card icon"></i> Formas de Pagamento</a>
+    <a class="nav-item" data-nav="usuarios" href="usuarios-lista.html"><i class="fa-solid fa-user-shield icon"></i> Usuários</a>
+    <div style="flex:1;"></div>
+    <div style="border-top:1px solid #FFF0F4;padding-top:.75rem;margin-top:.75rem;">
+      <a class="nav-item" href="login.html" style="color:#9ca3af;">
+        <i class="fa-solid fa-right-from-bracket icon"></i> Sair
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── CONTEÚDO ── -->
+  <main class="page-main">
+
+    <!-- Breadcrumb -->
+    <div class="fade-up" style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;color:#9ca3af;margin-bottom:1.5rem;">
+      <a href="pagamentos-lista.html" style="color:#9ca3af;text-decoration:none;transition:color .2s;"
+         onmouseover="this.style.color='#C9546E'" onmouseout="this.style.color='#9ca3af'">Formas de Pagamento</a>
+      <i class="fa-solid fa-chevron-right" style="font-size:.625rem;"></i>
+      <span style="color:#374151;font-weight:500;" id="breadcrumb-titulo">Nova forma</span>
+    </div>
+
+    <!-- Cabeçalho -->
+    <div class="fade-up" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h2 class="font-display" style="font-size:1.5rem;font-weight:600;color:#1f2937;" id="page-titulo">
+        Nova forma de pagamento
+      </h2>
+      <a href="pagamentos-lista.html" class="btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Voltar
+      </a>
+    </div>
+
+    <div class="card fade-up delay-1" style="max-width:680px;">
+      <input type="hidden" id="f-id">
+
+      <p class="section-title"><i class="fa-solid fa-credit-card" style="margin-right:.375rem;"></i>Dados da forma</p>
+
+      <div style="display:grid;grid-template-columns:1fr;gap:1.25rem;">
+        <div style="grid-column:1/-1;">
+          <label class="form-label">Descrição <span style="color:#C9546E;">*</span></label>
+          <input type="text" id="f-descricao" placeholder="Ex: Cartão de Crédito" class="form-input">
+          <span class="form-erro" id="err-descricao"></span>
+        </div>
+
+        <div>
+          <label class="form-label">Status</label>
+          <select id="f-ativo" class="form-input">
+            <option value="SIM">Ativa</option>
+            <option value="NAO">Inativa</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-top:2rem;
+                  padding-top:1.5rem;border-top:1px solid #FFF0F4;">
+        <a href="pagamentos-lista.html" class="btn-secondary">Cancelar</a>
+        <button class="btn-primary" onclick="salvar()">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar forma
+        </button>
+        <span id="salvando" style="font-size:.75rem;color:#9ca3af;display:none;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Salvando...
+        </span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden">
+  <i id="toast-icon" class="fa-solid fa-circle-check" style="color:#4A9B72;"></i>
+  <span id="toast-msg">Operação realizada!</span>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const modo = params.get('modo');
+  const id = params.get('id');
+
+  if (modo === 'editar') {
+    document.getElementById('page-titulo').textContent = 'Editar forma de pagamento';
+    document.getElementById('breadcrumb-titulo').textContent = 'Editar forma';
+    document.title = 'Editar Forma de Pagamento — Rosas & Tortas';
+    carregarForma(id);
+  }
+
+  async function carregarForma(formId) {
+    if (!formId) return;
+
+    try {
+      const res = await fetch(`http://localhost:8080/api/pagamento/listar/${formId}`);
+      if (!res.ok) {
+        showToast('Não foi possível carregar a forma de pagamento.', 'erro');
+        return;
+      }
+
+      const f = await res.json();
+
+      document.getElementById('f-id').value = f.id_forma_pagamento;
+      document.getElementById('f-descricao').value = f.descricao;
+      document.getElementById('f-ativo').value = f.ativo;
+    } catch (error) {
+      showToast('Erro ao buscar forma de pagamento.', 'erro');
+    }
+  }
+
+  function validar() {
+    let ok = true;
+    const descricao = document.getElementById('f-descricao');
+    const errDescricao = document.getElementById('err-descricao');
+
+    if (!descricao.value.trim()) {
+      descricao.classList.add('invalid');
+      errDescricao.textContent = 'Informe a descrição da forma de pagamento.';
+      ok = false;
+    } else {
+      descricao.classList.remove('invalid');
+      errDescricao.textContent = '';
+    }
+
+    return ok;
+  }
+
+  async function salvar() {
+    if (!validar()) return;
+
+    document.getElementById('salvando').style.display = 'inline-flex';
+
+    const payload = {
+      id_forma_pagamento: parseInt(document.getElementById('f-id').value) || 0,
+      descricao: document.getElementById('f-descricao').value.trim(),
+      ativo: document.getElementById('f-ativo').value,
+    };
+
+    const url = modo === 'editar'
+      ? 'http://localhost:8080/api/atualizar/pagamento'
+      : 'http://localhost:8080/api/novo/pagamento';
+    const method = modo === 'editar' ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      document.getElementById('salvando').style.display = 'none';
+      if (!res.ok) {
+        showToast('Erro ao salvar forma de pagamento.', 'erro');
+        return;
+      }
+
+      showToast(modo === 'editar' ? 'Forma atualizada!' : 'Forma cadastrada!');
+      setTimeout(() => window.location.href = 'pagamentos-lista.html', 1200);
+    } catch (error) {
+      document.getElementById('salvando').style.display = 'none';
+      showToast('Erro de conexão com o backend.', 'erro');
+    }
+  }
+</script>
+</body>
+</html>

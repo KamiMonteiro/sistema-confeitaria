@@ -3,6 +3,7 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"sistema-confeitaria/model"
 	"sistema-confeitaria/repository"
@@ -31,6 +32,11 @@ import (
 
 func CriarUsuario(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Método inválido", http.StatusMethodNotAllowed)
+			return
+		}
+
 		var u model.Usuario
 
 		err := json.NewDecoder(r.Body).Decode(&u)
@@ -185,5 +191,157 @@ func Login(db *sql.DB) http.HandlerFunc {
 		}
 
 		json.NewEncoder(w).Encode(response)
+	}
+}
+
+func CriarPagamento(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Método inválido", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var f model.FormaPagamento
+
+		err := json.NewDecoder(r.Body).Decode(&f)
+		if err != nil {
+			http.Error(w, "JSON inválido", http.StatusBadRequest)
+			return
+		}
+
+		if strings.TrimSpace(f.Descricao) == "" {
+			http.Error(w, "Descrição obrigatória", http.StatusBadRequest)
+			return
+		}
+
+		f.Ativo, err = normalizeAtivo(f.Ativo)
+		if err != nil {
+			http.Error(w, "Status inválido", http.StatusBadRequest)
+			return
+		}
+
+		err = repository.CriarFormaPagamento(db, &f)
+		if err != nil {
+			http.Error(w, "Erro ao salvar forma de pagamento", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+	}
+}
+
+func AtualizarPagamento(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			http.Error(w, "Método inválido", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var f model.FormaPagamento
+		err := json.NewDecoder(r.Body).Decode(&f)
+		if err != nil {
+			http.Error(w, "JSON inválido", http.StatusBadRequest)
+			return
+		}
+
+		if f.ID == 0 {
+			http.Error(w, "ID obrigatório", http.StatusBadRequest)
+			return
+		}
+
+		if strings.TrimSpace(f.Descricao) == "" {
+			http.Error(w, "Descrição obrigatória", http.StatusBadRequest)
+			return
+		}
+
+		f.Ativo, err = normalizeAtivo(f.Ativo)
+		if err != nil {
+			http.Error(w, "Status inválido", http.StatusBadRequest)
+			return
+		}
+
+		err = repository.AtualizarFormaPagamento(db, &f)
+		if err != nil {
+			http.Error(w, "Erro ao atualizar forma de pagamento", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func ConsultarPagamento(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Método inválido", http.StatusMethodNotAllowed)
+			return
+		}
+
+		idStr := strings.TrimPrefix(r.URL.Path, "/api/pagamento/listar/")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			http.Error(w, "ID inválido", http.StatusBadRequest)
+			return
+		}
+
+		f, err := repository.BuscarFormaPagamentoPorID(db, id)
+		if err != nil {
+			http.Error(w, "Forma de pagamento não encontrada", http.StatusNotFound)
+			return
+		}
+
+		json.NewEncoder(w).Encode(f)
+	}
+}
+
+func ExcluirPagamento(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			http.Error(w, "Método inválido", http.StatusMethodNotAllowed)
+			return
+		}
+
+		idStr := strings.TrimPrefix(r.URL.Path, "/api/pagamento/excluir/")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			http.Error(w, "ID inválido", http.StatusBadRequest)
+			return
+		}
+
+		err = repository.ExcluirFormaPagamento(db, id)
+		if err != nil {
+			http.Error(w, "Erro ao excluir forma de pagamento", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func BuscarTodasFormasPagamento(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Método inválido", http.StatusMethodNotAllowed)
+			return
+		}
+
+		formas, err := repository.BuscarTodasFormasPagamento(db)
+		if err != nil {
+			http.Error(w, "Erro ao buscar formas de pagamento", http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(formas)
+	}
+}
+
+func normalizeAtivo(value string) (string, error) {
+	switch strings.ToUpper(strings.TrimSpace(value)) {
+	case "SIM", "S":
+		return "S", nil
+	case "NAO", "N", "NÃO":
+		return "N", nil
+	default:
+		return "", errors.New("valor inválido")
 	}
 }
