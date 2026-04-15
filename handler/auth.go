@@ -180,7 +180,9 @@ func Login(db *sql.DB) http.HandlerFunc {
 
 		user, err := repository.AutenticarUsuario(db, creds.Email, creds.Senha)
 		if err != nil {
-			http.Error(w, "Credenciais inválidas", http.StatusUnauthorized)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Credenciais inválidas"})
 			return
 		}
 

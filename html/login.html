@@ -95,8 +95,14 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, senha })
       });
+
+      if (!res.ok) {
+        document.getElementById('login-erro').textContent = 'Usuário e/ou senha estão incorretos.';
+        document.getElementById('login-erro').style.display = 'block';
+        return;
+      }
+
       const data = await res.json();
-      if (!res.ok) { document.getElementById('login-erro').style.display = 'block'; return; }
       localStorage.setItem('token', data.token);
       // ───────────────────────────────────────────────────────────
 
