@@ -111,6 +111,37 @@ func BuscarTodosUsuario(db *sql.DB) ([]model.Usuario, error) {
 	return usuarios, nil
 }
 
+func BuscarUsuariosComFiltro(db *sql.DB, filtro string) ([]model.Usuario, error) {
+	query := `
+	SELECT id_usuario, nome_usuario, cpf, email_usuario
+	FROM USUARIO
+	WHERE nome_usuario LIKE ? OR email_usuario LIKE ?
+	ORDER BY nome_usuario ASC
+	`
+
+	filtroLike := "%" + filtro + "%"
+	rows, err := db.Query(query, filtroLike, filtroLike)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var usuarios []model.Usuario
+
+	for rows.Next() {
+		var u model.Usuario
+
+		err := rows.Scan(&u.ID, &u.Nome, &u.CPF, &u.Email)
+		if err != nil {
+			return nil, err
+		}
+
+		usuarios = append(usuarios, u)
+	}
+
+	return usuarios, nil
+}
+
 func AutenticarUsuario(db *sql.DB, email, senha string) (*model.Usuario, error) {
 	query := `
 	SELECT id_usuario, nome_usuario, cpf, email_usuario

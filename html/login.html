@@ -57,7 +57,7 @@
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;font-size:.75rem;color:#9ca3af;">
           <label style="display:flex;align-items:center;gap:.375rem;cursor:pointer;">
-            <input type="checkbox" style="accent-color:#F4A7B9;"> Lembrar acesso
+            <input id="login-lembrar" type="checkbox" style="accent-color:#F4A7B9;"> Lembrar acesso
           </label>
           <a href="#" style="color:#C9546E;">Esqueci a senha</a>
         </div>
@@ -80,20 +80,32 @@
 
   <script src="../js/app.js"></script>
   <script>
+    // Gerenciamento do "Lembrar acesso"
+    const loginEmail = document.getElementById('login-email');
+    const loginLembrar = document.getElementById('login-lembrar');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedEmail = localStorage.getItem('login-email');
+      if (savedEmail) {
+        loginEmail.value = savedEmail;
+        loginLembrar.checked = true;
+      }
+    });
+
     async function fazerLogin() {
-      const email = document.getElementById('login-email').value.trim();
+      const email = loginEmail.value.trim();
       const senha = document.getElementById('login-senha').value;
+      const lembrar = loginLembrar.checked;
 
       if (!email || !senha) {
         document.getElementById('login-erro').style.display = 'block';
         return;
       }
 
-      // ── Integração com backend Go ──────────────────────────────
-      const res  = await fetch('http://localhost:8080/api/auth/login', {
+      const res = await fetch('http://localhost:8080/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, senha })
+        body: JSON.stringify({ email, senha, lembrar })
       });
 
       if (!res.ok) {
@@ -103,8 +115,14 @@
       }
 
       const data = await res.json();
-      localStorage.setItem('token', data.token);
-      // ───────────────────────────────────────────────────────────
+
+      if (lembrar) {
+        //localStorage.setItem('token', data.token);
+        localStorage.setItem('login-email', email);
+      } else {
+        //sessionStorage.setItem('token', data.token);
+        localStorage.removeItem('login-email');
+      }
 
       window.location.href = 'dashboard.html';
     }

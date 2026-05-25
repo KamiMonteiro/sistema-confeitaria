@@ -138,7 +138,7 @@
 <script src="../js/app.js"></script>
 <script>
   // ── Dados de exemplo (remover ao integrar) ───────────────────────
-  let usuarios = [];
+  //let usuarios = [];
   //   { id:1, nome_usuario:'Admin Geral',    email_usuario:'admin@loja.com',      cpf:'000.000.000-00' },
   //   { id:2, nome_usuario:'Maria Fernanda', email_usuario:'maria@loja.com',       cpf:'123.456.789-09' },
   //   { id:3, nome_usuario:'João Atendente', email_usuario:'joao@loja.com',        cpf:'987.654.321-00' },
@@ -148,17 +148,18 @@
   // ── Integrar com backend Go ──────────────────────────────────────
   async function carregarUsuarios() {
     const res   = await fetch('http://localhost:8080/api/todos/usuario');
-    usuarios    = await res.json();
+    usuarios    = await res.json() || [];
     usuariosFiltrados = [...usuarios];
     renderTabela(usuariosFiltrados);
   }
   
-  carregarUsuarios();
-
   const POR_PAGINA = 10;
   let paginaAtual = 1;
-  let usuariosFiltrados = [...usuarios];
+  let usuariosFiltrados = [];
   let idParaExcluir = null;
+
+  // Carrega usuários ao iniciar a página
+  carregarUsuarios();
 
   // ── Render ───────────────────────────────────────────────────────
   function renderTabela(lista) {
@@ -229,15 +230,15 @@
   }
 
   // ── Filtros ──────────────────────────────────────────────────────
-  function filtrar() {
-    const texto = document.getElementById('filtro-nome').value.trim().toLowerCase();
+  async function filtrar() {
+    const texto = document.getElementById('filtro-nome').value.trim();
 
-    usuariosFiltrados = usuarios.filter(u => {
-      const matchesTexto = !texto ||
-        u.nome_usuario.toLowerCase().includes(texto) ||
-        u.email_usuario.toLowerCase().includes(texto);
-      return matchesTexto;
-    });
+    const url = texto 
+      ? `http://localhost:8080/api/usuarios/buscar?q=${encodeURIComponent(texto)}`
+      : `http://localhost:8080/api/todos/usuario`;
+
+    const res = await fetch(url);
+    usuariosFiltrados = await res.json() || [];
 
     paginaAtual = 1;
     renderTabela(usuariosFiltrados);
@@ -276,9 +277,6 @@
     renderTabela(usuariosFiltrados);
     showToast('Usuário excluído com sucesso.');
   }
-
-  // ── Init ─────────────────────────────────────────────────────────
-  renderTabela(usuarios);
 </script>
 </body>
 </html>

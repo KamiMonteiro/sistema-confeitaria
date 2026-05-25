@@ -30,6 +30,20 @@ import (
 	}
 }*/
 
+func cpfNumeros(cpf string) string {
+	return strings.Map(func(r rune) rune {
+		if r >= '0' && r <= '9' {
+			return r
+		}
+		return -1
+	}, cpf)
+}
+
+func validarCPF(cpf string) bool {
+	digits := cpfNumeros(cpf)
+	return len(digits) == 11
+}
+
 func CriarUsuario(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -48,6 +62,11 @@ func CriarUsuario(db *sql.DB) http.HandlerFunc {
 		// validação simples
 		if u.Nome == "" || u.Email == "" || u.Senha == "" {
 			http.Error(w, "Campos obrigatórios", http.StatusBadRequest)
+			return
+		}
+
+		if !validarCPF(u.CPF) {
+			http.Error(w, "CPF deve conter 11 números.", http.StatusBadRequest)
 			return
 		}
 
@@ -78,6 +97,16 @@ func AtualizarUsuario(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		if u.Nome == "" || u.Email == "" || strings.TrimSpace(u.CPF) == "" {
+			http.Error(w, "Campos obrigatórios", http.StatusBadRequest)
+			return
+		}
+
+		if !validarCPF(u.CPF) {
+			http.Error(w, "CPF deve conter 11 números.", http.StatusBadRequest)
+			return
+		}
+
 		err = repository.AtualizarUsuario(db, &u)
 		if err != nil {
 			http.Error(w, "Erro ao atualizar", http.StatusInternalServerError)
@@ -97,6 +126,29 @@ func BuscarTodosUsuario(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		json.NewEncoder(w).Encode(usuarios)
+	}
+}
+
+func BuscarUsuariosComFiltro(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		filtro := r.URL.Query().Get("q")
+
+		if filtro == "" {
+			filtro = ""
+		}
+
+		usuarios, err := repository.BuscarUsuariosComFiltro(db, filtro)
+		if err != nil {
+			http.Error(w, "Erro ao buscar usuários", http.StatusInternalServerError)
+			return
+		}
+
+		if usuarios == nil {
+			usuarios = []model.Usuario{}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(usuarios)
 	}
 }
@@ -125,7 +177,7 @@ func ExcluirUsuario(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-func BuscarUsuarioPorID(db *sql.DB, id int) (*model.Usuario, error) {
+/*func BuscarUsuarioPorID(db *sql.DB, id int) (*model.Usuario, error) {
 	query := `
 	SELECT id_usuario, nome_usuario, cpf, email_usuario
 	FROM USUARIO
@@ -141,7 +193,7 @@ func BuscarUsuarioPorID(db *sql.DB, id int) (*model.Usuario, error) {
 	}
 
 	return &u, nil
-}
+}*/
 
 func UsuarioPorID(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -54,6 +54,9 @@ func main() {
 	//GET para listar usuarios geral
 	http.HandleFunc("/api/todos/usuario", corsHandler(handler.BuscarTodosUsuario(db)))
 
+	//GET para buscar usuarios com filtro
+	http.HandleFunc("/api/usuarios/buscar", corsHandler(handler.BuscarUsuariosComFiltro(db)))
+
 	//GET para listar usuario por id
 	http.HandleFunc("/api/usuarios/listar/", corsHandler(handler.UsuarioPorID(db)))
 
