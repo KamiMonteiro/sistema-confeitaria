@@ -93,6 +93,7 @@ func BuscarTodosUsuario(db *sql.DB) ([]model.Usuario, error) {
 	if err != nil {
 		return nil, err
 	}
+	
 	defer rows.Close()
 
 	var usuarios []model.Usuario
