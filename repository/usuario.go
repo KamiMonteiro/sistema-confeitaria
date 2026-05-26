@@ -86,7 +86,7 @@ func BuscarTodosUsuario(db *sql.DB) ([]model.Usuario, error) {
 	query := `
 	SELECT id_usuario, nome_usuario, cpf, email_usuario
 	FROM USUARIO
-	ORDER BY nome_usuario ASC
+	ORDER BY nome_usuario COLLATE NOCASE ASC
 	`
 
 	rows, err := db.Query(query)
@@ -116,7 +116,7 @@ func BuscarUsuariosComFiltro(db *sql.DB, filtro string) ([]model.Usuario, error)
 	SELECT id_usuario, nome_usuario, cpf, email_usuario
 	FROM USUARIO
 	WHERE nome_usuario LIKE ? OR email_usuario LIKE ?
-	ORDER BY nome_usuario ASC
+	ORDER BY nome_usuario COLLATE NOCASE ASC
 	`
 
 	filtroLike := "%" + filtro + "%"
