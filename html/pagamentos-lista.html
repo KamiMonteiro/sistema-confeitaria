@@ -68,10 +68,10 @@
       </a>
     </div>
 
-    <!-- Busca por ID e filtro de status -->
+    <!-- Busca por descrição e filtro de status -->
     <div class="card fade-up delay-1"
          style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-bottom:1.25rem;padding:1rem;">
-      <input id="filtro-id" type="text" placeholder="🔍  Buscar por ID..." class="form-input"
+      <input id="filtro-descricao" type="text" placeholder="🔍  Buscar por descrição..." class="form-input"
              style="max-width:260px;">
       <select id="filtro-status" class="form-input" style="max-width:130px;" onchange="filtrarStatus()">
         <option value="">Status</option>
@@ -209,14 +209,14 @@
   }
 
   async function buscarForma() {
-    const id = document.getElementById('filtro-id').value.trim();
-    if (!id) {
+    const descricao = document.getElementById('filtro-descricao').value.trim();
+    if (!descricao) {
       filtrarStatus();
       return;
     }
 
     try {
-      const res = await fetch(`http://localhost:8080/api/pagamento/listar/${id}`);
+      const res = await fetch(`http://localhost:8080/api/pagamento/buscar?descricao=${encodeURIComponent(descricao)}`);
       if (!res.ok) {
         formasFiltradas = [];
         renderTabela(formasFiltradas);
@@ -224,12 +224,19 @@
         return;
       }
 
-      const f = await res.json();
-      formasFiltradas = [{
+      const dados = await res.json();
+      if (!Array.isArray(dados) || dados.length === 0) {
+        formasFiltradas = [];
+        renderTabela(formasFiltradas);
+        showToast('Forma de pagamento não encontrada.', 'erro');
+        return;
+      }
+
+      formasFiltradas = dados.map(f => ({
         id: f.id_forma_pagamento,
         nome: f.descricao,
         ativo: f.ativo,
-      }];
+      }));
       paginaAtual = 1;
       renderTabela(formasFiltradas);
     } catch (error) {
@@ -237,25 +244,34 @@
     }
   }
 
+  // Normaliza valores de "ativo" para comparação consistente
+  function normalizarAtivo(valor) {
+    const texto = String(valor || '').trim().toUpperCase();
+    if (texto === 'SIM' || texto === 'S') return 'S';
+    if (texto === 'NAO' || texto === 'N' || texto === 'NÃO') return 'N';
+    return '';
+  }
+
   function filtrarStatus() {
     const status = document.getElementById('filtro-status').value;
-    const id = document.getElementById('filtro-id').value.trim();
+    const descricao = document.getElementById('filtro-descricao').value.trim();
 
-    if (id) {
+    if (descricao) {
       buscarForma();
       return;
     }
 
+    // Converte o status selecionado para a forma normalizada usada nos dados
     const statusNormalizado = status === 'SIM' ? 'S' : status === 'NAO' ? 'N' : '';
-    formasFiltradas = statusNormalizado
-      ? formas.filter(f => String(f.ativo).toUpperCase() === statusNormalizado)
+    formasFiltradas = statusNormalizado 
+      ? formas.filter(f => normalizarAtivo(f.ativo) === statusNormalizado)
       : [...formas];
     paginaAtual = 1;
     renderTabela(formasFiltradas);
   }
 
   function mostrarTodos() {
-    document.getElementById('filtro-id').value = '';
+    document.getElementById('filtro-descricao').value = '';
     document.getElementById('filtro-status').value = '';
     formasFiltradas = [...formas];
     paginaAtual = 1;

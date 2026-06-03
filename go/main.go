@@ -46,6 +46,8 @@ func main() {
 	http.HandleFunc("/api/atualizar/pagamento", corsHandler(handler.AtualizarPagamento(db)))
 	// rota de consulta de forma de pagamento por id
 	http.HandleFunc("/api/pagamento/listar/", corsHandler(handler.ConsultarPagamento(db)))
+	// rota de busca de forma de pagamento por descrição
+	http.HandleFunc("/api/pagamento/buscar", corsHandler(handler.BuscarPagamentoPorDescricao(db)))
 	// rota para excluir forma de pagamento por id
 	http.HandleFunc("/api/pagamento/excluir/", corsHandler(handler.ExcluirPagamento(db)))
 	// rota para listar todas as formas de pagamento

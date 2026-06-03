@@ -348,6 +348,29 @@ func ConsultarPagamento(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+func BuscarPagamentoPorDescricao(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Método inválido", http.StatusMethodNotAllowed)
+			return
+		}
+
+		descricao := strings.TrimSpace(r.URL.Query().Get("descricao"))
+		if descricao == "" {
+			http.Error(w, "Descrição obrigatória", http.StatusBadRequest)
+			return
+		}
+
+		formas, err := repository.BuscarFormasPagamentoPorDescricao(db, descricao)
+		if err != nil {
+			http.Error(w, "Erro ao buscar formas de pagamento", http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(formas)
+	}
+}
+
 func ExcluirPagamento(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
