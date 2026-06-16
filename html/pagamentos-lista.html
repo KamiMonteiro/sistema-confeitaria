@@ -130,7 +130,7 @@
     <div style="display:flex;gap:.75rem;justify-content:center;">
       <button class="btn-secondary" onclick="fecharModal('modal-excluir')">Cancelar</button>
       <button class="btn-danger" onclick="confirmarExclusao()">
-        <i class="fa-solid fa-trash-can"></i> Excluir
+        <i class="fa-solid fa-trash-can"></i> Sim
       </button>
     </div>
   </div>
@@ -144,12 +144,26 @@
 
 <script src="../js/app.js"></script>
 <script>
-  let formas = [];
+  
+  
+  // ── Integrar com backend Go ──────────────────────────────────────
+  async function carregarFormasPgto() {
+    const res   = await fetch('http://localhost:8080/api/todos/pagamento');
+    formaPgto    = await res.json() || [];
+    formaPagtoFiltrado = [...formaPgto];
+    renderTabela(formaPagtoFiltrado);
+    console.log('Formas de pagamento carregadas:', formaPgto);
+  }
+  
   const POR_PAGINA = 10;
   let paginaAtual = 1;
-  let formasFiltradas = [];
+  let formaPagtoFiltrado = [];
   let idParaExcluir = null;
-  let nomeParaExcluir = '';
+
+  // Carrega formas de pagamento ao iniciar a página
+  carregarFormasPgto();
+
+  // ── Render ───────────────────────────────────────────────────────
 
   function renderTabela(lista) {
     const inicio = (paginaAtual - 1) * POR_PAGINA;
@@ -159,7 +173,7 @@
       const ativoAtivo = ['SIM', 'S'].includes(String(f.ativo).toUpperCase());
       return `
       <tr>
-        <td style="font-weight:500;color:#1f2937;">${f.nome}</td>
+        <td style="font-weight:500;color:#1f2937;">${f.descricao}</td>
         <td>
           <span class="badge ${ativoAtivo ? 'badge-green' : 'badge-gray'}">
             ${ativoAtivo ? 'Ativa' : 'Inativa'}
@@ -175,7 +189,7 @@
                title="Editar">
               <i class="fa-solid fa-pen-to-square" style="font-size:.875rem;"></i>
             </a>
-            <button onclick="pedirExclusao(${f.id}, ${JSON.stringify(f.nome)})"
+            <button onclick="pedirExclusao(${f.id}, ${JSON.stringify(f.descricao)})"
                     style="display:inline-flex;align-items:center;justify-content:center;
                            width:2rem;height:2rem;border-radius:.5rem;color:#d1d5db;
                            background:transparent;border:none;cursor:pointer;transition:all .2s;"
@@ -190,6 +204,7 @@
       `;
     }).join('') || '<tr><td colspan="3" style="text-align:center;color:#9ca3af;padding:2rem;">Nenhuma forma de pagamento encontrada.</td></tr>';
 
+    // Paginação
     const total = lista.length;
     const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
     document.getElementById('pag-info').textContent =
@@ -203,116 +218,67 @@
       btn.style.cssText = `padding:.25rem .625rem;border-radius:.5rem;font-size:.75rem;border:none;cursor:pointer;
                            background:${i===paginaAtual?'#FAD4DE':'transparent'};
                            color:${i===paginaAtual?'#C9546E':'#9ca3af'};font-weight:${i===paginaAtual?'600':'400'};`;
-      btn.onclick = () => { paginaAtual = i; renderTabela(formasFiltradas); };
+      btn.onclick = () => { paginaAtual = i; renderTabela(formaPagtoFiltrado); };
       botoes.appendChild(btn);
     }
   }
 
-  async function buscarForma() {
-    const descricao = document.getElementById('filtro-descricao').value.trim();
-    if (!descricao) {
-      filtrarStatus();
-      return;
-    }
+ // ── Filtros ──────────────────────────────────────────────────────
+ async function filtrar() {
+  const texto = document.getElementById('filtro-descricao').value.trim();
 
-    try {
-      const res = await fetch(`http://localhost:8080/api/pagamento/buscar?descricao=${encodeURIComponent(descricao)}`);
-      if (!res.ok) {
-        formasFiltradas = [];
-        renderTabela(formasFiltradas);
-        showToast('Forma de pagamento não encontrada.', 'erro');
-        return;
-      }
+  const url = texto
+    ? `http://localhost:8080/api/pagamento/buscar?descricao=${encodeURIComponent(texto)}`
+    : `http://localhost:8080/api/todos/pagamento`;
 
-      const dados = await res.json();
-      if (!Array.isArray(dados) || dados.length === 0) {
-        formasFiltradas = [];
-        renderTabela(formasFiltradas);
-        showToast('Forma de pagamento não encontrada.', 'erro');
-        return;
-      }
+  const res = await fetch(url);
+  formasFiltradas = await res.json() || [];
 
-      formasFiltradas = dados.map(f => ({
-        id: f.id_forma_pagamento,
-        nome: f.descricao,
-        ativo: f.ativo,
-      }));
-      paginaAtual = 1;
-      renderTabela(formasFiltradas);
-    } catch (error) {
-      showToast('Erro ao buscar forma de pagamento.', 'erro');
-    }
-  }
+  /*formasFiltradas = formasFiltradas.map(f => ({
+    id: f.id_forma_pagamento,
+    nome: f.descricao,
+    ativo: f.ativo,
+  }));*/
 
-  // Normaliza valores de "ativo" para comparação consistente
-  function normalizarAtivo(valor) {
-    const texto = String(valor || '').trim().toUpperCase();
-    if (texto === 'SIM' || texto === 'S') return 'S';
-    if (texto === 'NAO' || texto === 'N' || texto === 'NÃO') return 'N';
-    return '';
-  }
+  console.log('Formas filtradas:', formasFiltradas);
+  paginaAtual = 1;
+  renderTabela(formasFiltradas);
+}
 
-  function filtrarStatus() {
-    const status = document.getElementById('filtro-status').value;
-    const descricao = document.getElementById('filtro-descricao').value.trim();
+function limparFiltros() {
+  document.getElementById('filtro-descricao').value = '';
+  //document.getElementById('filtro-status').value = '';
+  formasFiltradas = [...formaPgto];
+  paginaAtual = 1;
+  renderTabela(formasFiltradas);
+}
 
-    if (descricao) {
-      buscarForma();
-      return;
-    }
+async function carregarFormas() {
+  const res = await fetch('http://localhost:8080/api/todos/pagamento');
+  const dados = await res.json();
 
-    // Converte o status selecionado para a forma normalizada usada nos dados
-    const statusNormalizado = status === 'SIM' ? 'S' : status === 'NAO' ? 'N' : '';
-    formasFiltradas = statusNormalizado 
-      ? formas.filter(f => normalizarAtivo(f.ativo) === statusNormalizado)
-      : [...formas];
-    paginaAtual = 1;
-    renderTabela(formasFiltradas);
-  }
+  formas = dados.map(f => ({
+    id: f.id_forma_pagamento,
+    nome: f.descricao,
+    ativo: f.ativo,
+  }));
 
-  function mostrarTodos() {
-    document.getElementById('filtro-descricao').value = '';
-    document.getElementById('filtro-status').value = '';
-    formasFiltradas = [...formas];
-    paginaAtual = 1;
-    renderTabela(formasFiltradas);
-  }
-
-  async function carregarFormas() {
-    try {
-      const res = await fetch('http://localhost:8080/api/todos/pagamento');
-      if (!res.ok) {
-        showToast('Não foi possível carregar as formas de pagamento.', 'erro');
-        return;
-      }
-
-      const dados = await res.json();
-      formas = dados.map(f => ({
-        id: f.id_forma_pagamento,
-        nome: f.descricao,
-        ativo: f.ativo,
-      }));
-      formasFiltradas = [...formas];
-      paginaAtual = 1;
-      renderTabela(formasFiltradas);
-    } catch (error) {
-      showToast('Erro ao carregar formas de pagamento.', 'erro');
-    }
-  }
-
-  function pedirExclusao(id, nome) {
+  formasFiltradas = [...formas];
+  paginaAtual = 1;
+  renderTabela(formasFiltradas);
+}
+    // ── Exclusão ─────────────────────────────────────────────────────
+  function pedirExclusao(id) {
     idParaExcluir = id;
-    nomeParaExcluir = nome || '';
-    document.getElementById('nome-pagamento-exclusao').textContent = nomeParaExcluir
-      ? `Forma: ${nomeParaExcluir}`
-      : 'Forma de pagamento selecionada.';
+    const usuario = forma_pagamento.find(f => f.id === id);
+    document.getElementById('nome-pagamento-exclusao').textContent = descricao ? forma_pagamento.descricao : '';    abrirModal('modal-excluir');
     abrirModal('modal-excluir');
   }
 
   async function confirmarExclusao() {
     fecharModal('modal-excluir');
 
-    try {
+   
       const res = await fetch(`http://localhost:8080/api/pagamento/excluir/${idParaExcluir}`, {
         method: 'DELETE',
       });
@@ -326,12 +292,7 @@
       formasFiltradas = formasFiltradas.filter(f => f.id !== idParaExcluir);
       renderTabela(formasFiltradas);
       showToast('Forma de pagamento excluída com sucesso.');
-    } catch (error) {
-      showToast('Erro de conexão ao excluir.', 'erro');
     }
-  }
-
-  carregarFormas();
 </script>
 </body>
 </html>

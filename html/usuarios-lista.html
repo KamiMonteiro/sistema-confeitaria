@@ -137,14 +137,7 @@
 
 <script src="../js/app.js"></script>
 <script>
-  // ── Dados de exemplo (remover ao integrar) ───────────────────────
-  //let usuarios = [];
-  //   { id:1, nome_usuario:'Admin Geral',    email_usuario:'admin@loja.com',      cpf:'000.000.000-00' },
-  //   { id:2, nome_usuario:'Maria Fernanda', email_usuario:'maria@loja.com',       cpf:'123.456.789-09' },
-  //   { id:3, nome_usuario:'João Atendente', email_usuario:'joao@loja.com',        cpf:'987.654.321-00' },
-  //   { id:4, nome_usuario:'Paula Caixa',    email_usuario:'paula@loja.com',       cpf:'111.222.333-44' },
-  // ];
-
+ 
   // ── Integrar com backend Go ──────────────────────────────────────
   async function carregarUsuarios() {
     const res   = await fetch('http://localhost:8080/api/todos/usuario');

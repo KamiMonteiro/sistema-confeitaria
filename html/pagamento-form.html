@@ -201,7 +201,7 @@
       }
 
       showToast(modo === 'editar' ? 'Forma atualizada!' : 'Forma cadastrada!');
-      setTimeout(() => window.location.href = 'pagamentos-lista.html', 1200);
+      window.location.href = 'pagamentos-lista.html';
     } catch (error) {
       document.getElementById('salvando').style.display = 'none';
       showToast('Erro de conexão com o backend.', 'erro');
