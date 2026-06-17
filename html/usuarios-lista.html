@@ -227,7 +227,7 @@
     const texto = document.getElementById('filtro-nome').value.trim();
 
     const url = texto 
-      ? `http://localhost:8080/api/usuarios/buscar?q=${encodeURIComponent(texto)}`
+      ? `http://localhost:8080/api/usuarios/buscar?nome=${encodeURIComponent(texto)}`
       : `http://localhost:8080/api/todos/usuario`;
 
     const res = await fetch(url);

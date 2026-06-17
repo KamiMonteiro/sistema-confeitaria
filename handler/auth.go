@@ -132,7 +132,7 @@ func BuscarTodosUsuario(db *sql.DB) http.HandlerFunc {
 
 func BuscarUsuariosComFiltro(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		filtro := r.URL.Query().Get("q")
+		filtro := r.URL.Query().Get("nome")
 
 		if filtro == "" {
 			filtro = ""
@@ -350,24 +350,24 @@ func ConsultarPagamento(db *sql.DB) http.HandlerFunc {
 
 func BuscarPagamentoPorDescricao(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "Método inválido", http.StatusMethodNotAllowed)
-			return
+		filtro := r.URL.Query().Get("descricao")
+
+		if filtro == "" {
+			filtro = ""
 		}
 
-		descricao := strings.TrimSpace(r.URL.Query().Get("descricao"))
-		if descricao == "" {
-			http.Error(w, "Descrição obrigatória", http.StatusBadRequest)
-			return
-		}
-
-		formas, err := repository.BuscarFormasPagamentoPorDescricao(db, descricao)
+		formaPgto, err := repository.BuscarFormasPagamentoPorDescricao(db, filtro)
 		if err != nil {
-			http.Error(w, "Erro ao buscar formas de pagamento", http.StatusInternalServerError)
+			http.Error(w, "Erro ao buscar tipo de pagamento", http.StatusInternalServerError)
 			return
 		}
 
-		json.NewEncoder(w).Encode(formas)
+		if formaPgto == nil {
+			formaPgto = []model.FormaPagamento{}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(formaPgto)
 	}
 }
 

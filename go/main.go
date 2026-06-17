@@ -53,19 +53,14 @@ func main() {
 
 	// rota principal (POST de criação)
 	http.HandleFunc("/api/novo/usuario", corsHandler(handler.CriarUsuario(db)))
-
 	//GET para listar usuarios geral
 	http.HandleFunc("/api/todos/usuario", corsHandler(handler.BuscarTodosUsuario(db)))
-
 	//GET para buscar usuarios com filtro
 	http.HandleFunc("/api/usuarios/buscar", corsHandler(handler.BuscarUsuariosComFiltro(db)))
-
 	//GET para listar usuario por id
 	http.HandleFunc("/api/usuarios/listar/", corsHandler(handler.UsuarioPorID(db)))
-
 	// DELETE para excluir usuário por id
 	http.HandleFunc("/api/usuarios/excluir/", corsHandler(handler.ExcluirUsuario(db)))
-
 	// rota com ID (PUT usuário)
 	http.HandleFunc("/api/atualizar/usuarios", corsHandler(handler.AtualizarUsuario(db)))
 

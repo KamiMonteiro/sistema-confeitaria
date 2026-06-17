@@ -224,50 +224,54 @@
   }
 
  // ── Filtros ──────────────────────────────────────────────────────
- async function filtrar() {
+ async function buscarForma() {
   const texto = document.getElementById('filtro-descricao').value.trim();
 
   const url = texto
     ? `http://localhost:8080/api/pagamento/buscar?descricao=${encodeURIComponent(texto)}`
     : `http://localhost:8080/api/todos/pagamento`;
 
+    console.log('URL de busca:', url);
   const res = await fetch(url);
   formasFiltradas = await res.json() || [];
 
-  /*formasFiltradas = formasFiltradas.map(f => ({
-    id: f.id_forma_pagamento,
-    nome: f.descricao,
-    ativo: f.ativo,
-  }));*/
 
-  console.log('Formas filtradas:', formasFiltradas);
   paginaAtual = 1;
   renderTabela(formasFiltradas);
 }
 
-function limparFiltros() {
+//Limpa filtragem da tela
+function mostrarTodos() {
   document.getElementById('filtro-descricao').value = '';
-  //document.getElementById('filtro-status').value = '';
   formasFiltradas = [...formaPgto];
   paginaAtual = 1;
   renderTabela(formasFiltradas);
 }
 
-async function carregarFormas() {
-  const res = await fetch('http://localhost:8080/api/todos/pagamento');
-  const dados = await res.json();
+/*function filtrarStatus() {
+  const status = document.getElementById('filtro-status').value;
+  const texto = document.getElementById('filtro-descricao').value.trim();
 
-  formas = dados.map(f => ({
-    id: f.id_forma_pagamento,
-    nome: f.descricao,
-    ativo: f.ativo,
-  }));
+  // Se tiver texto no campo descrição, deixa o filtrar() cuidar
+  if (texto) {
+    filtrar();
+    return;
+  }
 
-  formasFiltradas = [...formas];
+  // Filtra localmente pelo array já carregado
+  if (status === '') {
+    formasFiltradas = [...formas];
+  } else {
+    formasFiltradas = formas.filter(f => 
+      String(f.ativo).toUpperCase() === status.toUpperCase()
+    );
+  }
+
   paginaAtual = 1;
   renderTabela(formasFiltradas);
-}
-    // ── Exclusão ─────────────────────────────────────────────────────
+}*/
+
+ // ── Exclusão ─────────────────────────────────────────────────────
   function pedirExclusao(id) {
     idParaExcluir = id;
     const usuario = forma_pagamento.find(f => f.id === id);

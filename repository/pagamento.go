@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"sistema-confeitaria/model"
-	"strings"
 )
 
 func CriarFormaPagamento(db *sql.DB, f *model.FormaPagamento) error {
@@ -83,23 +82,25 @@ func BuscarFormasPagamentoPorDescricao(db *sql.DB, descricao string) ([]model.Fo
 SELECT id_forma_pagamento, descricao, ativo
 FROM FORMA_PAGAMENTO
 WHERE UPPER(descricao) LIKE UPPER(?)
-ORDER BY descricao ASC
+ORDER BY descricao COLLATE NOCASE ASC
 `
 
-	padrao := "%" + strings.TrimSpace(descricao) + "%"
-	rows, err := db.Query(query, padrao)
+	filtroLike := "%" + descricao + "%"
+	rows, err := db.Query(query, filtroLike)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	var formas []model.FormaPagamento
+
 	for rows.Next() {
 		var f model.FormaPagamento
 		err := rows.Scan(&f.ID, &f.Descricao, &f.Ativo)
 		if err != nil {
 			return nil, err
 		}
+
 		formas = append(formas, f)
 	}
 
