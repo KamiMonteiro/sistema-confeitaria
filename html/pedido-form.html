@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedido — Rosas & Tortas Confeitaria</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js" defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rose: { DEFAULT:'#F4A7B9', light:'#FAD4DE', dark:'#E8789A', deep:'#C9546E' },
+            mint: { DEFAULT:'#A8D5BA', light:'#D4EDE0', dark:'#6FBA96', deep:'#4A9B72' },
+          },
+          fontFamily: { display: ['Playfair Display','serif'] },
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .form-label { display:block; font-size:.75rem; font-weight:500; color:#6b7280; margin-bottom:.375rem; }
+    .form-erro  { font-size:.7rem; color:#ef4444; margin-top:.25rem; display:block; min-height:1rem; }
+    .form-input.invalid { border-color:#fca5a5; box-shadow:0 0 0 2px rgba(252,165,165,.3); }
+    .section-title {
+      font-size:.8rem; font-weight:600; color:#9ca3af; text-transform:uppercase;
+      letter-spacing:.06em; margin-bottom:1rem; margin-top:1.5rem; padding-top:1.25rem;
+      border-top:1px solid #FFF0F4;
+    }
+    .section-title:first-child { margin-top:0; padding-top:0; border-top:none; }
+    .item-row {
+      display:grid; grid-template-columns:1fr auto auto auto;
+      gap:.75rem; align-items:center;
+      padding:.625rem .75rem;
+      background:#FFF8F5; border-radius:.75rem;
+      margin-bottom:.5rem;
+    }
+  </style>
+</head>
+<body class="petal-bg" data-page="pedidos">
+
+<div class="page-layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span style="font-size:1.5rem;">🌹</span>
+      <div>
+        <p class="font-display" style="font-size:.875rem;font-weight:600;color:#1f2937;line-height:1.2;">Rosas & Tortas</p>
+        <p style="font-size:.7rem;color:#d1d5db;">Confeitaria</p>
+      </div>
+    </div>
+    <p class="sidebar-label">Menu</p>
+    <a class="nav-item" data-nav="dashboard"  href="dashboard.html"><i class="fa-solid fa-house-chimney icon"></i> Dashboard</a>
+    <a class="nav-item" data-nav="produtos"   href="produtos-lista.html"><i class="fa-solid fa-cake-candles icon"></i> Produtos</a>
+    <a class="nav-item" data-nav="clientes"   href="clientes-lista.html"><i class="fa-solid fa-users icon"></i> Clientes</a>
+    <a class="nav-item" data-nav="pedidos"    href="pedidos-lista.html"><i class="fa-solid fa-bag-shopping icon"></i> Pedidos</a>
+    <a class="nav-item" data-nav="pagamentos" href="pagamentos-lista.html"><i class="fa-solid fa-credit-card icon"></i> Formas de Pagamento</a>
+    <a class="nav-item" data-nav="usuarios"   href="usuarios-lista.html"><i class="fa-solid fa-user-shield icon"></i> Usuários</a>
+    <div style="flex:1;"></div>
+    <div style="border-top:1px solid #FFF0F4;padding-top:.75rem;margin-top:.75rem;">
+      <div style="display:flex;align-items:center;gap:.625rem;padding:.5rem;">
+        <div id="sidebar-avatar" style="width:1.75rem;height:1.75rem;border-radius:9999px;background:#FAD4DE;
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:.75rem;font-weight:700;color:#C9546E;">?</div>
+        <div>
+          <p style="font-size:.75rem;font-weight:500;color:#374151;" id="sidebar-usuario">—</p>
+          <p style="font-size:.7rem;color:#d1d5db;" id="sidebar-email">—</p>
+        </div>
+      </div>
+      <a class="nav-item" href="login.html" style="color:#9ca3af;margin-top:.25rem;">
+        <i class="fa-solid fa-right-from-bracket icon"></i> Sair
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── CONTEÚDO ── -->
+  <main class="page-main">
+
+    <!-- Breadcrumb -->
+    <div class="fade-up" style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;color:#9ca3af;margin-bottom:1.5rem;">
+      <a href="pedidos-lista.html" style="color:#9ca3af;text-decoration:none;transition:color .2s;"
+         onmouseover="this.style.color='#C9546E'" onmouseout="this.style.color='#9ca3af'">Pedidos</a>
+      <i class="fa-solid fa-chevron-right" style="font-size:.625rem;"></i>
+      <span style="color:#374151;font-weight:500;" id="breadcrumb-titulo">Novo pedido</span>
+    </div>
+
+    <!-- Cabeçalho -->
+    <div class="fade-up" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h2 class="font-display" style="font-size:1.5rem;font-weight:600;color:#1f2937;" id="page-titulo">
+        Novo pedido
+      </h2>
+      <a href="pedidos-lista.html" class="btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Voltar
+      </a>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem;align-items:start;">
+
+      <!-- Coluna principal -->
+      <div>
+        <!-- Dados do pedido -->
+        <div class="card fade-up delay-1">
+          <input type="hidden" id="f-id">
+
+          <p class="section-title" style="margin-top:0;padding-top:0;border-top:none;">
+            <i class="fa-solid fa-bag-shopping" style="margin-right:.375rem;"></i>Dados do pedido
+          </p>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+            <div style="grid-column:1/-1;">
+              <label class="form-label">Cliente <span style="color:#C9546E;">*</span></label>
+              <select id="f-cliente" class="form-input">
+                <option value="">Selecione o cliente...</option>
+              </select>
+              <span class="form-erro" id="err-cliente"></span>
+            </div>
+
+            <div>
+              <label class="form-label">Forma de pagamento <span style="color:#C9546E;">*</span></label>
+              <select id="f-pagamento" class="form-input">
+                <option value="">Selecione...</option>
+              </select>
+              <span class="form-erro" id="err-pagamento"></span>
+            </div>
+
+            <div>
+              <label class="form-label">Status <span style="color:#C9546E;">*</span></label>
+              <select id="f-status" class="form-input">
+                <option value="Pendente">Pendente</option>
+                <option value="Em preparo">Em preparo</option>
+                <option value="Pronto">Pronto</option>
+                <option value="Entregue">Entregue</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label">Data do pedido</label>
+              <input type="date" id="f-dt-pedido" class="form-input">
+            </div>
+
+            <div>
+              <label class="form-label">Data de entrega</label>
+              <input type="date" id="f-dt-entrega" class="form-input">
+            </div>
+
+            <div style="grid-column:1/-1;">
+              <label class="form-label">Observações de entrega</label>
+              <textarea id="f-obs" rows="2" placeholder="Ex: Entregar no período da tarde..."
+                        class="form-input" style="resize:vertical;"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Itens do pedido -->
+        <div class="card fade-up delay-2" style="margin-top:1.25rem;">
+          <p class="section-title" style="margin-top:0;padding-top:0;border-top:none;">
+            <i class="fa-solid fa-list-ul" style="margin-right:.375rem;"></i>Itens do pedido
+          </p>
+
+          <!-- Seletor para adicionar item -->
+          <div style="display:grid;grid-template-columns:1fr auto auto;gap:.75rem;align-items:end;margin-bottom:1rem;">
+            <div>
+              <label class="form-label">Produto</label>
+              <select id="sel-produto" class="form-input">
+                <option value="">Selecione um produto...</option>
+              </select>
+            </div>
+            <div style="width:90px;">
+              <label class="form-label">Qtd.</label>
+              <input type="number" id="sel-qtd" value="1" min="1" class="form-input" style="text-align:center;">
+            </div>
+            <button class="btn-mint" onclick="adicionarItem()" style="white-space:nowrap;">
+              <i class="fa-solid fa-plus"></i> Adicionar
+            </button>
+          </div>
+          <span class="form-erro" id="err-itens"></span>
+
+          <!-- Lista de itens adicionados -->
+          <div id="lista-itens">
+            <p style="font-size:.875rem;color:#d1d5db;text-align:center;padding:1rem 0;" id="itens-vazio">
+              Nenhum item adicionado.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coluna lateral: resumo -->
+      <div class="card fade-up delay-2" style="position:sticky;top:1.5rem;">
+        <p style="font-size:.8rem;font-weight:600;color:#9ca3af;text-transform:uppercase;
+           letter-spacing:.06em;margin-bottom:1rem;">
+          <i class="fa-solid fa-receipt" style="margin-right:.375rem;"></i>Resumo do pedido
+        </p>
+
+        <div id="resumo-itens" style="margin-bottom:1rem;"></div>
+
+        <div style="border-top:1px solid #FFF0F4;padding-top:1rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:.875rem;color:#6b7280;">Total</span>
+            <span style="font-size:1.25rem;font-weight:700;color:#C9546E;" id="total-geral">R$ 0,00</span>
+          </div>
+        </div>
+
+        <div style="margin-top:1.5rem;display:flex;flex-direction:column;gap:.625rem;">
+          <button class="btn-primary" onclick="salvar()" style="width:100%;justify-content:center;">
+            <i class="fa-solid fa-floppy-disk"></i> Salvar pedido
+          </button>
+          <a href="pedidos-lista.html" class="btn-secondary" style="width:100%;justify-content:center;text-align:center;">
+            Cancelar
+          </a>
+        </div>
+        <span id="salvando" style="font-size:.75rem;color:#9ca3af;display:none;text-align:center;margin-top:.5rem;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Salvando...
+        </span>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden">
+  <i id="toast-icon" class="fa-solid fa-circle-check" style="color:#4A9B72;"></i>
+  <span id="toast-msg">Operação realizada!</span>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const modo = params.get('modo');
+  const id = params.get('id');
+
+  let produtosCatalogo = [];
+  let itens = [];
+
+  // ── Inicialização ────────────────────────────────────────────────
+  async function inicializar() {
+    await Promise.all([carregarClientes(), carregarPagamentos(), carregarProdutos()]);
+    if (modo === 'editar') {
+      document.getElementById('page-titulo').textContent = 'Editar pedido';
+      document.getElementById('breadcrumb-titulo').textContent = 'Editar pedido';
+      document.title = 'Editar Pedido — Rosas & Tortas';
+      carregarPedido(id);
+    } else {
+      // Data padrão = hoje
+      document.getElementById('f-dt-pedido').value = new Date().toISOString().split('T')[0];
+    }
+  }
+
+  async function carregarClientes() {
+    const res = await fetch('http://localhost:8080/api/todos/cliente');
+    const lista = await res.json() || [];
+    const sel = document.getElementById('f-cliente');
+    lista.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id_cliente;
+      opt.textContent = c.nome;
+      sel.appendChild(opt);
+    });
+  }
+
+  async function carregarPagamentos() {
+    const res = await fetch('http://localhost:8080/api/todos/pagamento');
+    const lista = await res.json() || [];
+    const sel = document.getElementById('f-pagamento');
+    lista.filter(f => f.ativo === 'S').forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f.id_forma_pagamento;
+      opt.textContent = f.descricao;
+      sel.appendChild(opt);
+    });
+  }
+
+  async function carregarProdutos() {
+    const res = await fetch('http://localhost:8080/api/todos/produto');
+    produtosCatalogo = await res.json() || [];
+    const sel = document.getElementById('sel-produto');
+    produtosCatalogo.filter(p => p.ativo === 'S').forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id_produto;
+      opt.textContent = `${p.nome} — ${formatarMoeda(p.preco_unitario)}`;
+      opt.dataset.preco = p.preco_unitario;
+      opt.dataset.nome  = p.nome;
+      sel.appendChild(opt);
+    });
+  }
+
+  async function carregarPedido(pedidoId) {
+    if (!pedidoId) return;
+    try {
+      const res = await fetch(`http://localhost:8080/api/pedido/listar/${pedidoId}`);
+      if (!res.ok) { showToast('Não foi possível carregar o pedido.', 'erro'); return; }
+      const p = await res.json();
+
+      document.getElementById('f-id').value          = p.id_pedido;
+      document.getElementById('f-cliente').value     = p.id_cliente;
+      document.getElementById('f-pagamento').value   = p.id_forma_pagamento;
+      document.getElementById('f-status').value      = p.status_entrega;
+      document.getElementById('f-dt-pedido').value   = (p.dt_pedido || '').split('T')[0];
+      document.getElementById('f-dt-entrega').value  = (p.dt_entrega || '').split('T')[0];
+      document.getElementById('f-obs').value         = p.observacao_entrega;
+
+      itens = (p.itens || []).map(i => ({
+        id_produto:    i.id_produto,
+        nome:          i.nome_produto,
+        preco_unitario: i.preco_unitario,
+        qtd:           i.qtd_item,
+        total:         i.vlr_total_item,
+      }));
+      renderItens();
+    } catch {
+      showToast('Erro ao buscar pedido.', 'erro');
+    }
+  }
+
+  inicializar();
+
+  // ── Itens ────────────────────────────────────────────────────────
+  function adicionarItem() {
+    const sel   = document.getElementById('sel-produto');
+    const qtd   = parseInt(document.getElementById('sel-qtd').value) || 1;
+    const opt   = sel.options[sel.selectedIndex];
+    if (!sel.value) { showToast('Selecione um produto.', 'erro'); return; }
+
+    const idProduto = parseInt(sel.value);
+    const preco     = parseFloat(opt.dataset.preco);
+    const nome      = opt.dataset.nome;
+
+    const existente = itens.find(i => i.id_produto === idProduto);
+    if (existente) {
+      existente.qtd   += qtd;
+      existente.total  = existente.qtd * existente.preco_unitario;
+    } else {
+      itens.push({ id_produto: idProduto, nome, preco_unitario: preco, qtd, total: preco * qtd });
+    }
+
+    sel.value = '';
+    document.getElementById('sel-qtd').value = 1;
+    document.getElementById('err-itens').textContent = '';
+    renderItens();
+  }
+
+  function removerItem(idx) {
+    itens.splice(idx, 1);
+    renderItens();
+  }
+
+  function renderItens() {
+    const container = document.getElementById('lista-itens');
+    const vazio     = document.getElementById('itens-vazio');
+    const resumo    = document.getElementById('resumo-itens');
+
+    if (itens.length === 0) {
+      container.innerHTML = '';
+      container.appendChild(vazio);
+      vazio.style.display = 'block';
+      resumo.innerHTML = '';
+      document.getElementById('total-geral').textContent = 'R$ 0,00';
+      return;
+    }
+
+    vazio.style.display = 'none';
+    container.innerHTML = itens.map((item, idx) => `
+      <div class="item-row">
+        <div>
+          <p style="font-size:.875rem;font-weight:500;color:#1f2937;">${item.nome}</p>
+          <p style="font-size:.75rem;color:#9ca3af;">${formatarMoeda(item.preco_unitario)} × ${item.qtd}</p>
+        </div>
+        <span style="font-size:.875rem;font-weight:600;color:#1f2937;">${formatarMoeda(item.total)}</span>
+        <div style="display:flex;align-items:center;gap:.25rem;">
+          <button onclick="alterarQtd(${idx},-1)"
+                  style="width:1.5rem;height:1.5rem;border-radius:.375rem;border:1px solid #F4A7B9;
+                         background:transparent;cursor:pointer;font-size:.75rem;color:#C9546E;">−</button>
+          <span style="font-size:.875rem;min-width:1.5rem;text-align:center;">${item.qtd}</span>
+          <button onclick="alterarQtd(${idx},1)"
+                  style="width:1.5rem;height:1.5rem;border-radius:.375rem;border:1px solid #F4A7B9;
+                         background:transparent;cursor:pointer;font-size:.75rem;color:#C9546E;">+</button>
+        </div>
+        <button onclick="removerItem(${idx})"
+                style="width:1.75rem;height:1.75rem;border-radius:.375rem;border:none;
+                       background:transparent;cursor:pointer;color:#d1d5db;transition:all .2s;"
+                onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#d1d5db'">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    `).join('');
+
+    const total = itens.reduce((s, i) => s + i.total, 0);
+    document.getElementById('total-geral').textContent = formatarMoeda(total);
+
+    resumo.innerHTML = itens.map(i =>
+      `<div style="display:flex;justify-content:space-between;font-size:.8rem;color:#6b7280;margin-bottom:.25rem;">
+        <span>${i.nome} ×${i.qtd}</span>
+        <span>${formatarMoeda(i.total)}</span>
+      </div>`
+    ).join('');
+  }
+
+  function alterarQtd(idx, delta) {
+    itens[idx].qtd = Math.max(1, itens[idx].qtd + delta);
+    itens[idx].total = itens[idx].qtd * itens[idx].preco_unitario;
+    renderItens();
+  }
+
+  // ── Validação ────────────────────────────────────────────────────
+  function validar() {
+    let ok = true;
+
+    const cliente   = document.getElementById('f-cliente');
+    const pagamento = document.getElementById('f-pagamento');
+
+    if (!cliente.value) {
+      cliente.classList.add('invalid');
+      document.getElementById('err-cliente').textContent = 'Selecione o cliente.';
+      ok = false;
+    } else { cliente.classList.remove('invalid'); document.getElementById('err-cliente').textContent = ''; }
+
+    if (!pagamento.value) {
+      pagamento.classList.add('invalid');
+      document.getElementById('err-pagamento').textContent = 'Selecione a forma de pagamento.';
+      ok = false;
+    } else { pagamento.classList.remove('invalid'); document.getElementById('err-pagamento').textContent = ''; }
+
+    if (itens.length === 0) {
+      document.getElementById('err-itens').textContent = 'Adicione ao menos um item ao pedido.';
+      ok = false;
+    } else { document.getElementById('err-itens').textContent = ''; }
+
+    return ok;
+  }
+
+  // ── Salvar ───────────────────────────────────────────────────────
+  async function salvar() {
+    if (!validar()) return;
+    document.getElementById('salvando').style.display = 'block';
+
+    const total = itens.reduce((s, i) => s + i.total, 0);
+
+    const payload = {
+      id_pedido:          parseInt(document.getElementById('f-id').value) || 0,
+      id_cliente:         parseInt(document.getElementById('f-cliente').value),
+      id_forma_pagamento: parseInt(document.getElementById('f-pagamento').value),
+      id_usuario:         1,
+      status_entrega:     document.getElementById('f-status').value,
+      dt_pedido:          document.getElementById('f-dt-pedido').value,
+      dt_entrega:         document.getElementById('f-dt-entrega').value,
+      observacao_entrega: document.getElementById('f-obs').value.trim(),
+      vlr_total_pedido:   total,
+      itens: itens.map(i => ({
+        id_produto:    i.id_produto,
+        qtd_item:      i.qtd,
+        vlr_total_item: i.total,
+      })),
+    };
+
+    const url    = modo === 'editar' ? 'http://localhost:8080/api/atualizar/pedido' : 'http://localhost:8080/api/novo/pedido';
+    const method = modo === 'editar' ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      document.getElementById('salvando').style.display = 'none';
+      if (!res.ok) { showToast('Erro ao salvar pedido.', 'erro'); return; }
+      showToast(modo === 'editar' ? 'Pedido atualizado!' : 'Pedido cadastrado!');
+      window.location.href = 'pedidos-lista.html';
+    } catch {
+      document.getElementById('salvando').style.display = 'none';
+      showToast('Erro de conexão com o backend.', 'erro');
+    }
+  }
+</script>
+</body>
+</html>

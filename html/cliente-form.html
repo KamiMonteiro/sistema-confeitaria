@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cliente — Rosas & Tortas Confeitaria</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js" defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rose: { DEFAULT:'#F4A7B9', light:'#FAD4DE', dark:'#E8789A', deep:'#C9546E' },
+            mint: { DEFAULT:'#A8D5BA', light:'#D4EDE0', dark:'#6FBA96', deep:'#4A9B72' },
+          },
+          fontFamily: { display: ['Playfair Display','serif'] },
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .form-label { display:block; font-size:.75rem; font-weight:500; color:#6b7280; margin-bottom:.375rem; }
+    .form-erro  { font-size:.7rem; color:#ef4444; margin-top:.25rem; display:block; min-height:1rem; }
+    .form-input.invalid { border-color:#fca5a5; box-shadow:0 0 0 2px rgba(252,165,165,.3); }
+  </style>
+</head>
+<body class="petal-bg" data-page="clientes">
+
+<div class="page-layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span style="font-size:1.5rem;">🌹</span>
+      <div>
+        <p class="font-display" style="font-size:.875rem;font-weight:600;color:#1f2937;line-height:1.2;">Rosas & Tortas</p>
+        <p style="font-size:.7rem;color:#d1d5db;">Confeitaria</p>
+      </div>
+    </div>
+    <p class="sidebar-label">Menu</p>
+    <a class="nav-item" data-nav="dashboard"  href="dashboard.html"><i class="fa-solid fa-house-chimney icon"></i> Dashboard</a>
+    <a class="nav-item" data-nav="produtos"   href="produtos-lista.html"><i class="fa-solid fa-cake-candles icon"></i> Produtos</a>
+    <a class="nav-item" data-nav="clientes"   href="clientes-lista.html"><i class="fa-solid fa-users icon"></i> Clientes</a>
+    <a class="nav-item" data-nav="pedidos"    href="pedidos-lista.html"><i class="fa-solid fa-bag-shopping icon"></i> Pedidos</a>
+    <a class="nav-item" data-nav="pagamentos" href="pagamentos-lista.html"><i class="fa-solid fa-credit-card icon"></i> Formas de Pagamento</a>
+    <a class="nav-item" data-nav="usuarios"   href="usuarios-lista.html"><i class="fa-solid fa-user-shield icon"></i> Usuários</a>
+    <div style="flex:1;"></div>
+    <div style="border-top:1px solid #FFF0F4;padding-top:.75rem;margin-top:.75rem;">
+      <div style="display:flex;align-items:center;gap:.625rem;padding:.5rem;">
+        <div id="sidebar-avatar" style="width:1.75rem;height:1.75rem;border-radius:9999px;background:#FAD4DE;
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:.75rem;font-weight:700;color:#C9546E;">?</div>
+        <div>
+          <p style="font-size:.75rem;font-weight:500;color:#374151;" id="sidebar-usuario">—</p>
+          <p style="font-size:.7rem;color:#d1d5db;" id="sidebar-email">—</p>
+        </div>
+      </div>
+      <a class="nav-item" href="login.html" style="color:#9ca3af;margin-top:.25rem;">
+        <i class="fa-solid fa-right-from-bracket icon"></i> Sair
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── CONTEÚDO ── -->
+  <main class="page-main">
+
+    <!-- Breadcrumb -->
+    <div class="fade-up" style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;color:#9ca3af;margin-bottom:1.5rem;">
+      <a href="clientes-lista.html" style="color:#9ca3af;text-decoration:none;transition:color .2s;"
+         onmouseover="this.style.color='#C9546E'" onmouseout="this.style.color='#9ca3af'">Clientes</a>
+      <i class="fa-solid fa-chevron-right" style="font-size:.625rem;"></i>
+      <span style="color:#374151;font-weight:500;" id="breadcrumb-titulo">Novo cliente</span>
+    </div>
+
+    <!-- Cabeçalho -->
+    <div class="fade-up" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h2 class="font-display" style="font-size:1.5rem;font-weight:600;color:#1f2937;" id="page-titulo">
+        Novo cliente
+      </h2>
+      <a href="clientes-lista.html" class="btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Voltar
+      </a>
+    </div>
+
+    <div class="card fade-up delay-1" style="max-width:720px;">
+      <input type="hidden" id="f-id">
+
+      <p class="section-title" style="font-size:.8rem;font-weight:600;color:#9ca3af;text-transform:uppercase;
+         letter-spacing:.06em;margin-bottom:1.25rem;">
+        <i class="fa-solid fa-user" style="margin-right:.375rem;"></i>Dados do cliente
+      </p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+        <div style="grid-column:1/-1;">
+          <label class="form-label">Nome completo <span style="color:#C9546E;">*</span></label>
+          <input type="text" id="f-nome" placeholder="Ex: Maria Silva" class="form-input">
+          <span class="form-erro" id="err-nome"></span>
+        </div>
+
+        <div>
+          <label class="form-label">CPF</label>
+          <input type="text" id="f-cpf" placeholder="000.000.000-00" class="form-input"
+                 maxlength="14" oninput="aplicarMascaraCPF(this)">
+          <span class="form-erro" id="err-cpf"></span>
+        </div>
+
+        <div>
+          <label class="form-label">Telefone</label>
+          <input type="text" id="f-telefone" placeholder="(11) 99999-9999" class="form-input"
+                 maxlength="15" oninput="aplicarMascaraTelefone(this)">
+          <span class="form-erro" id="err-telefone"></span>
+        </div>
+
+        <div style="grid-column:1/-1;">
+          <label class="form-label">E-mail</label>
+          <input type="email" id="f-email" placeholder="exemplo@email.com" class="form-input">
+        </div>
+
+        <div style="grid-column:1/-1;">
+          <label class="form-label">Endereço</label>
+          <input type="text" id="f-endereco" placeholder="Rua, número, bairro, cidade" class="form-input">
+        </div>
+
+        <div style="grid-column:1/-1;">
+          <label class="form-label">Localizador Google Maps</label>
+          <div style="display:flex;gap:.5rem;align-items:flex-start;">
+            <input type="text" id="f-localizador"
+                   placeholder="Cole o link de compartilhamento do Google Maps"
+                   class="form-input" style="flex:1;">
+            <button type="button" onclick="abrirNoMaps()"
+                    style="flex-shrink:0;display:inline-flex;align-items:center;gap:.375rem;
+                           padding:.5rem .875rem;border-radius:.75rem;border:none;cursor:pointer;
+                           background:#A8D5BA;color:#1f6b47;font-size:.8rem;font-weight:500;
+                           white-space:nowrap;height:42px;"
+                    title="Abrir localização no Google Maps">
+              <i class="fa-solid fa-map-location-dot"></i> Abrir
+            </button>
+          </div>
+          <span style="font-size:.7rem;color:#9ca3af;margin-top:.25rem;display:block;">
+            No Google Maps: compartilhar → copiar link → cole aqui
+          </span>
+          <span class="form-erro" id="err-localizador"></span>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-top:2rem;
+                  padding-top:1.5rem;border-top:1px solid #FFF0F4;">
+        <a href="clientes-lista.html" class="btn-secondary">Cancelar</a>
+        <button class="btn-primary" onclick="salvar()">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar cliente
+        </button>
+        <span id="salvando" style="font-size:.75rem;color:#9ca3af;display:none;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Salvando...
+        </span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden">
+  <i id="toast-icon" class="fa-solid fa-circle-check" style="color:#4A9B72;"></i>
+  <span id="toast-msg">Operação realizada!</span>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const modo = params.get('modo');
+  const id   = params.get('id');
+
+  if (modo === 'editar') {
+    document.getElementById('page-titulo').textContent     = 'Editar cliente';
+    document.getElementById('breadcrumb-titulo').textContent = 'Editar cliente';
+    document.title = 'Editar Cliente — Rosas & Tortas';
+    carregarCliente(id);
+  }
+
+  // ── Máscaras ────────────────────────────────────────────────────────────────
+
+  // Aplica a máscara 000.000.000-00 enquanto o usuário digita
+  function aplicarMascaraCPF(input) {
+    let v = input.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 9)      v = v.replace(/^(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+    else if (v.length > 6) v = v.replace(/^(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+    else if (v.length > 3) v = v.replace(/^(\d{3})(\d{0,3})/, '$1.$2');
+    input.value = v;
+  }
+
+  // Aplica a máscara (XX) XXXXX-XXXX ou (XX) XXXX-XXXX para celular e fixo
+  function aplicarMascaraTelefone(input) {
+    let v = input.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+    else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    else if (v.length > 2) v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+    else if (v.length > 0) v = v.replace(/^(\d{0,2})/, '($1');
+    input.value = v;
+  }
+
+  // ── Carregamento para edição ─────────────────────────────────────────────────
+
+  async function carregarCliente(clienteId) {
+    if (!clienteId) return;
+    try {
+      const res = await fetch(`http://localhost:8080/api/cliente/listar/${clienteId}`);
+      if (!res.ok) { showToast('Não foi possível carregar o cliente.', 'erro'); return; }
+      const c = await res.json();
+      document.getElementById('f-id').value           = c.id_cliente;
+      document.getElementById('f-nome').value         = c.nome;
+      document.getElementById('f-email').value        = c.email;
+      document.getElementById('f-endereco').value     = c.endereco;
+      document.getElementById('f-localizador').value  = c.localizador;
+      // Aplica as máscaras nos dados que vêm do banco
+      const cpfEl = document.getElementById('f-cpf');
+      cpfEl.value = c.cpf;
+      aplicarMascaraCPF(cpfEl);
+      const telEl = document.getElementById('f-telefone');
+      telEl.value = c.telefone;
+      aplicarMascaraTelefone(telEl);
+    } catch {
+      showToast('Erro ao buscar cliente.', 'erro');
+    }
+  }
+
+  // ── Google Maps ──────────────────────────────────────────────────────────────
+
+  // Abre o link do campo localizador em nova aba — só funciona se tiver algo preenchido
+  function abrirNoMaps() {
+    const link = document.getElementById('f-localizador').value.trim();
+    if (!link) { showToast('Cole um link do Google Maps primeiro.', 'erro'); return; }
+    window.open(link, '_blank', 'noopener');
+  }
+
+  // ── Validação ────────────────────────────────────────────────────────────────
+
+  function validar() {
+    let ok = true;
+
+    const nome    = document.getElementById('f-nome');
+    const errNome = document.getElementById('err-nome');
+    if (!nome.value.trim()) {
+      nome.classList.add('invalid'); errNome.textContent = 'Informe o nome do cliente.'; ok = false;
+    } else {
+      nome.classList.remove('invalid'); errNome.textContent = '';
+    }
+
+    const cpfVal  = document.getElementById('f-cpf').value.replace(/\D/g, '');
+    const cpfEl   = document.getElementById('f-cpf');
+    const errCpf  = document.getElementById('err-cpf');
+    if (cpfVal && cpfVal.length !== 11) {
+      cpfEl.classList.add('invalid'); errCpf.textContent = 'CPF incompleto — informe os 11 dígitos.'; ok = false;
+    } else {
+      cpfEl.classList.remove('invalid'); errCpf.textContent = '';
+    }
+
+    const telVal  = document.getElementById('f-telefone').value.replace(/\D/g, '');
+    const telEl   = document.getElementById('f-telefone');
+    const errTel  = document.getElementById('err-telefone');
+    if (telVal && (telVal.length < 10 || telVal.length > 11)) {
+      telEl.classList.add('invalid'); errTel.textContent = 'Telefone inválido — informe DDD + número.'; ok = false;
+    } else {
+      telEl.classList.remove('invalid'); errTel.textContent = '';
+    }
+
+    return ok;
+  }
+
+  // ── Salvar ───────────────────────────────────────────────────────────────────
+
+  async function salvar() {
+    if (!validar()) return;
+    document.getElementById('salvando').style.display = 'inline-flex';
+
+    const payload = {
+      id_cliente:  parseInt(document.getElementById('f-id').value) || 0,
+      nome:        document.getElementById('f-nome').value.trim(),
+      // Salva sem máscara — só os dígitos
+      cpf:         document.getElementById('f-cpf').value.replace(/\D/g, ''),
+      telefone:    document.getElementById('f-telefone').value.replace(/\D/g, ''),
+      email:       document.getElementById('f-email').value.trim(),
+      endereco:    document.getElementById('f-endereco').value.trim(),
+      localizador: document.getElementById('f-localizador').value.trim(),
+    };
+
+    const url    = modo === 'editar' ? 'http://localhost:8080/api/atualizar/cliente' : 'http://localhost:8080/api/novo/cliente';
+    const method = modo === 'editar' ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      document.getElementById('salvando').style.display = 'none';
+      if (!res.ok) { showToast('Erro ao salvar cliente.', 'erro'); return; }
+      showToast(modo === 'editar' ? 'Cliente atualizado!' : 'Cliente cadastrado!');
+      window.location.href = 'clientes-lista.html';
+    } catch {
+      document.getElementById('salvando').style.display = 'none';
+      showToast('Erro de conexão com o backend.', 'erro');
+    }
+  }
+</script>
+</body>
+</html>

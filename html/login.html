@@ -116,11 +116,13 @@
 
       const data = await res.json();
 
+      // Salva os dados do usuário logado — usados pelo sidebar em todas as telas
+      localStorage.setItem('usuario_nome',  data.user.nome_usuario);
+      localStorage.setItem('usuario_email', data.user.email_usuario);
+
       if (lembrar) {
-        //localStorage.setItem('token', data.token);
         localStorage.setItem('login-email', email);
       } else {
-        //sessionStorage.setItem('token', data.token);
         localStorage.removeItem('login-email');
       }
 

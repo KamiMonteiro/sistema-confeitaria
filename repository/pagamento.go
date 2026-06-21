@@ -5,60 +5,48 @@ import (
 	"sistema-confeitaria/model"
 )
 
+// CriarFormaPagamento insere uma nova forma de pagamento.
+// O ativo já vem normalizado como 'S' ou 'N' pelo handler antes de chegar aqui.
 func CriarFormaPagamento(db *sql.DB, f *model.FormaPagamento) error {
-	query := `INSERT INTO FORMA_PAGAMENTO (descricao, ativo)
-VALUES (?, ?)`
-
-	_, err := db.Exec(query,
-		f.Descricao,
-		f.Ativo,
+	_, err := db.Exec(
+		`INSERT INTO FORMA_PAGAMENTO (descricao, ativo) VALUES (?, ?)`,
+		f.Descricao, f.Ativo,
 	)
-
 	return err
 }
 
+// AtualizarFormaPagamento atualiza descrição e status pelo ID.
 func AtualizarFormaPagamento(db *sql.DB, f *model.FormaPagamento) error {
-	query := `
-UPDATE FORMA_PAGAMENTO
-SET descricao = ?, ativo = ?
-WHERE id_forma_pagamento = ?
-`
-
-	_, err := db.Exec(query,
-		f.Descricao,
-		f.Ativo,
-		f.ID,
+	_, err := db.Exec(
+		`UPDATE FORMA_PAGAMENTO SET descricao = ?, ativo = ? WHERE id_forma_pagamento = ?`,
+		f.Descricao, f.Ativo, f.ID,
 	)
-
 	return err
 }
 
+// BuscarFormaPagamentoPorID retorna uma forma de pagamento pelo ID.
+// Usada na tela de edição pra carregar os dados no formulário.
 func BuscarFormaPagamentoPorID(db *sql.DB, id int) (*model.FormaPagamento, error) {
-	query := `
-SELECT id_forma_pagamento, descricao, ativo
-FROM FORMA_PAGAMENTO
-WHERE id_forma_pagamento = ?
-`
-
-	row := db.QueryRow(query, id)
+	row := db.QueryRow(`
+		SELECT id_forma_pagamento, descricao, ativo
+		FROM FORMA_PAGAMENTO
+		WHERE id_forma_pagamento = ?`, id)
 
 	var f model.FormaPagamento
 	err := row.Scan(&f.ID, &f.Descricao, &f.Ativo)
 	if err != nil {
 		return nil, err
 	}
-
 	return &f, nil
 }
 
+// BuscarTodasFormasPagamento retorna todas as formas, ativas e inativas, em ordem alfabética.
+// Usada na listagem e também pra popular o select do formulário de pedido.
 func BuscarTodasFormasPagamento(db *sql.DB) ([]model.FormaPagamento, error) {
-	query := `
-SELECT id_forma_pagamento, descricao, ativo
-FROM FORMA_PAGAMENTO
-ORDER BY descricao ASC
-`
-
-	rows, err := db.Query(query)
+	rows, err := db.Query(`
+		SELECT id_forma_pagamento, descricao, ativo
+		FROM FORMA_PAGAMENTO
+		ORDER BY descricao ASC`)
 	if err != nil {
 		return nil, err
 	}
@@ -67,52 +55,43 @@ ORDER BY descricao ASC
 	var formas []model.FormaPagamento
 	for rows.Next() {
 		var f model.FormaPagamento
-		err := rows.Scan(&f.ID, &f.Descricao, &f.Ativo)
-		if err != nil {
+		if err := rows.Scan(&f.ID, &f.Descricao, &f.Ativo); err != nil {
 			return nil, err
 		}
 		formas = append(formas, f)
 	}
-
 	return formas, nil
 }
 
+// BuscarFormasPagamentoPorDescricao filtra pelo nome — busca parcial, ignora maiúsculas/minúsculas.
+// Usada na caixa de pesquisa da tela de formas de pagamento.
 func BuscarFormasPagamentoPorDescricao(db *sql.DB, descricao string) ([]model.FormaPagamento, error) {
-	query := `
-SELECT id_forma_pagamento, descricao, ativo
-FROM FORMA_PAGAMENTO
-WHERE UPPER(descricao) LIKE UPPER(?)
-ORDER BY descricao COLLATE NOCASE ASC
-`
-
 	filtroLike := "%" + descricao + "%"
-	rows, err := db.Query(query, filtroLike)
+
+	rows, err := db.Query(`
+		SELECT id_forma_pagamento, descricao, ativo
+		FROM FORMA_PAGAMENTO
+		WHERE UPPER(descricao) LIKE UPPER(?)
+		ORDER BY descricao COLLATE NOCASE ASC`,
+		filtroLike)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	var formas []model.FormaPagamento
-
 	for rows.Next() {
 		var f model.FormaPagamento
-		err := rows.Scan(&f.ID, &f.Descricao, &f.Ativo)
-		if err != nil {
+		if err := rows.Scan(&f.ID, &f.Descricao, &f.Ativo); err != nil {
 			return nil, err
 		}
-
 		formas = append(formas, f)
 	}
-
 	return formas, nil
 }
 
+// ExcluirFormaPagamento remove pelo ID.
 func ExcluirFormaPagamento(db *sql.DB, id int) error {
-	query := `
-DELETE FROM FORMA_PAGAMENTO
-WHERE id_forma_pagamento = ?
-`
-
-	_, err := db.Exec(query, id)
+	_, err := db.Exec(`DELETE FROM FORMA_PAGAMENTO WHERE id_forma_pagamento = ?`, id)
 	return err
 }

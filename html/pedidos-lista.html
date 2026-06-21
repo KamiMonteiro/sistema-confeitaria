@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formas de Pagamento — Rosas & Tortas Confeitaria</title>
+  <title>Pedidos — Rosas & Tortas Confeitaria</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js" defer></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/styles.css">
 </head>
-<body class="petal-bg" data-page="pagamentos">
+<body class="petal-bg" data-page="pedidos">
 
 <div class="page-layout">
 
@@ -69,23 +69,24 @@
     <!-- Header -->
     <div class="fade-up" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
       <div>
-        <h2 class="font-display" style="font-size:1.5rem;font-weight:600;color:#1f2937;">Formas de Pagamento</h2>
-        <p style="font-size:.875rem;color:#9ca3af;margin-top:.25rem;">Gerencie as formas de pagamento do sistema</p>
+        <h2 class="font-display" style="font-size:1.5rem;font-weight:600;color:#1f2937;">Pedidos</h2>
+        <p style="font-size:.875rem;color:#9ca3af;margin-top:.25rem;">Acompanhe e gerencie os pedidos da confeitaria</p>
       </div>
-      <a class="btn-primary" href="pagamento-form.html?modo=novo">
-        <i class="fa-solid fa-plus"></i> Nova forma
+      <a class="btn-primary" href="pedido-form.html?modo=novo">
+        <i class="fa-solid fa-plus"></i> Novo pedido
       </a>
     </div>
 
     <!-- Filtros -->
     <div class="card fade-up delay-1"
          style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-bottom:1.25rem;padding:1rem;">
-      <input id="filtro-descricao" type="text" placeholder="🔍  Buscar por descrição..." class="form-input"
-             style="max-width:260px;">
-      <select id="filtro-status" class="form-input" style="max-width:130px;">
-        <option value="">Status</option>
-        <option value="S">Ativo</option>
-        <option value="N">Inativo</option>
+      <select id="filtro-status" class="form-input" style="max-width:180px;">
+        <option value="">Todos os status</option>
+        <option value="Pendente">Pendente</option>
+        <option value="Em preparo">Em preparo</option>
+        <option value="Pronto">Pronto</option>
+        <option value="Entregue">Entregue</option>
+        <option value="Cancelado">Cancelado</option>
       </select>
       <button class="btn-mint" onclick="buscar()">
         <i class="fa-solid fa-magnifying-glass"></i> Buscar
@@ -100,16 +101,20 @@
       <table class="tbl">
         <thead>
           <tr>
-            <th>Nome</th>
+            <th>Pedido</th>
+            <th>Cliente</th>
+            <th>Data</th>
+            <th>Entrega</th>
+            <th>Pagamento</th>
+            <th>Total</th>
             <th>Status</th>
             <th style="text-align:center;">Ações</th>
           </tr>
         </thead>
-        <tbody id="tbody-pagamentos"></tbody>
+        <tbody id="tbody-pedidos"></tbody>
       </table>
 
-      <div id="paginacao"
-           style="display:flex;align-items:center;justify-content:space-between;
+      <div style="display:flex;align-items:center;justify-content:space-between;
                   padding:.75rem 1rem;border-top:1px solid #FFF0F4;font-size:.75rem;color:#9ca3af;">
         <span id="pag-info"></span>
         <div id="pag-botoes" style="display:flex;gap:.25rem;"></div>
@@ -127,9 +132,8 @@
       <i class="fa-solid fa-trash-can" style="font-size:1.25rem;color:#C9546E;"></i>
     </div>
     <h3 class="font-display" style="font-size:1.125rem;font-weight:600;color:#1f2937;margin-bottom:.5rem;">
-      Excluir forma de pagamento?
+      Excluir pedido <span id="modal-pedido-id" style="font-weight:700;color:#C9546E;"></span>?
     </h3>
-    <p style="font-size:.95rem;color:#1f2937;font-weight:600;margin-bottom:.5rem;" id="modal-nome-pgto"></p>
     <p style="font-size:.875rem;color:#9ca3af;margin-bottom:1.5rem;">Esta ação não pode ser desfeita.</p>
     <div style="display:flex;gap:.75rem;justify-content:center;">
       <button class="btn-secondary" onclick="fecharModal('modal-excluir')">Cancelar</button>
@@ -150,45 +154,60 @@
 <script>
   const POR_PAGINA = 10;
   let paginaAtual = 1;
-  let formas = [];
-  let formasFiltradas = [];
+  let pedidos = [];
+  let pedidosFiltrados = [];
   let idParaExcluir = null;
 
-  async function carregarFormas() {
-    const res = await fetch('http://localhost:8080/api/todos/pagamento');
-    formas = await res.json() || [];
-    formasFiltradas = [...formas];
-    renderTabela(formasFiltradas);
+  const STATUS_BADGE = {
+    'Pendente':   'badge-yellow',
+    'Em preparo': 'badge-rose',
+    'Pronto':     'badge-green',
+    'Entregue':   'badge-green',
+    'Cancelado':  'badge-gray',
+  };
+
+  async function carregarPedidos() {
+    const res = await fetch('http://localhost:8080/api/todos/pedido');
+    pedidos = await res.json() || [];
+    pedidosFiltrados = [...pedidos];
+    renderTabela(pedidosFiltrados);
   }
 
-  carregarFormas();
+  carregarPedidos();
 
-  // ── Render ───────────────────────────────────────────────────────
+  function formatarData(dt) {
+    if (!dt) return '—';
+    const d = new Date(dt);
+    if (isNaN(d)) return dt;
+    return d.toLocaleDateString('pt-BR');
+  }
+
   function renderTabela(lista) {
     const inicio = (paginaAtual - 1) * POR_PAGINA;
     const pagina = lista.slice(inicio, inicio + POR_PAGINA);
 
-    document.getElementById('tbody-pagamentos').innerHTML = pagina.map(f => {
-      const ativo = f.ativo === 'S';
+    document.getElementById('tbody-pedidos').innerHTML = pagina.map(p => {
+      const badge = STATUS_BADGE[p.status_entrega] || 'badge-gray';
       return `
       <tr>
-        <td style="font-weight:500;color:#1f2937;">${f.descricao}</td>
-        <td>
-          <span class="badge ${ativo ? 'badge-green' : 'badge-gray'}">
-            ${ativo ? 'Ativa' : 'Inativa'}
-          </span>
-        </td>
+        <td style="color:#9ca3af;font-weight:600;">#${p.id_pedido}</td>
+        <td style="font-weight:500;color:#1f2937;">${p.nome_cliente || '—'}</td>
+        <td style="color:#6b7280;">${formatarData(p.dt_pedido)}</td>
+        <td style="color:#6b7280;">${formatarData(p.dt_entrega)}</td>
+        <td style="color:#6b7280;">${p.nome_forma_pgto || '—'}</td>
+        <td style="font-weight:600;color:#1f2937;">${formatarMoeda(p.vlr_total_pedido)}</td>
+        <td><span class="badge ${badge}">${p.status_entrega}</span></td>
         <td style="text-align:center;">
           <div style="display:inline-flex;gap:.25rem;">
-            <a href="pagamento-form.html?modo=editar&id=${f.id_forma_pagamento}"
+            <a href="pedido-form.html?modo=editar&id=${p.id_pedido}"
                style="display:inline-flex;align-items:center;justify-content:center;
                       width:2rem;height:2rem;border-radius:.5rem;color:#E8789A;
-                      background:transparent;border:none;cursor:pointer;transition:background .2s;"
+                      background:transparent;border:none;cursor:pointer;text-decoration:none;transition:background .2s;"
                onmouseover="this.style.background='#FAD4DE'" onmouseout="this.style.background='transparent'"
                title="Editar">
               <i class="fa-solid fa-pen-to-square" style="font-size:.875rem;"></i>
             </a>
-            <button onclick="pedirExclusao(${f.id_forma_pagamento}, ${JSON.stringify(f.descricao)})"
+            <button onclick="pedirExclusao(${p.id_pedido})"
                     style="display:inline-flex;align-items:center;justify-content:center;
                            width:2rem;height:2rem;border-radius:.5rem;color:#d1d5db;
                            background:transparent;border:none;cursor:pointer;transition:all .2s;"
@@ -200,7 +219,7 @@
           </div>
         </td>
       </tr>`;
-    }).join('') || '<tr><td colspan="3" style="text-align:center;color:#9ca3af;padding:2rem;">Nenhuma forma de pagamento encontrada.</td></tr>';
+    }).join('') || '<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:2rem;">Nenhum pedido encontrado.</td></tr>';
 
     const total = lista.length;
     const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
@@ -216,59 +235,44 @@
                            background:${i === paginaAtual ? '#FAD4DE' : 'transparent'};
                            color:${i === paginaAtual ? '#C9546E' : '#9ca3af'};
                            font-weight:${i === paginaAtual ? '600' : '400'};`;
-      btn.onclick = () => { paginaAtual = i; renderTabela(formasFiltradas); };
+      btn.onclick = () => { paginaAtual = i; renderTabela(pedidosFiltrados); };
       botoes.appendChild(btn);
     }
   }
 
-  // ── Filtros ──────────────────────────────────────────────────────
   async function buscar() {
-    const texto = document.getElementById('filtro-descricao').value.trim();
     const status = document.getElementById('filtro-status').value;
-
-    // Busca por descrição via API se houver texto, senão usa tudo que já está em memória
-    if (texto) {
-      const res = await fetch(`http://localhost:8080/api/pagamento/buscar?descricao=${encodeURIComponent(texto)}`);
-      formasFiltradas = await res.json() || [];
-    } else {
-      formasFiltradas = [...formas];
-    }
-
-    // Filtro de status é sempre local
     if (status) {
-      formasFiltradas = formasFiltradas.filter(f => f.ativo === status);
+      const res = await fetch(`http://localhost:8080/api/pedido/buscar?status=${encodeURIComponent(status)}`);
+      pedidosFiltrados = await res.json() || [];
+    } else {
+      pedidosFiltrados = [...pedidos];
     }
-
     paginaAtual = 1;
-    renderTabela(formasFiltradas);
+    renderTabela(pedidosFiltrados);
   }
 
   function mostrarTodos() {
-    document.getElementById('filtro-descricao').value = '';
     document.getElementById('filtro-status').value = '';
-    formasFiltradas = [...formas];
+    pedidosFiltrados = [...pedidos];
     paginaAtual = 1;
-    renderTabela(formasFiltradas);
+    renderTabela(pedidosFiltrados);
   }
 
-  // ── Exclusão ─────────────────────────────────────────────────────
-  function pedirExclusao(id, descricao) {
+  function pedirExclusao(id) {
     idParaExcluir = id;
-    document.getElementById('modal-nome-pgto').textContent = descricao;
+    document.getElementById('modal-pedido-id').textContent = '#' + id;
     abrirModal('modal-excluir');
   }
 
   async function confirmarExclusao() {
     fecharModal('modal-excluir');
-    const res = await fetch(`http://localhost:8080/api/pagamento/excluir/${idParaExcluir}`, { method: 'DELETE' });
-    if (!res.ok) {
-      showToast('Erro ao excluir forma de pagamento.', 'erro');
-      return;
-    }
-    formas = formas.filter(f => f.id_forma_pagamento !== idParaExcluir);
-    formasFiltradas = formasFiltradas.filter(f => f.id_forma_pagamento !== idParaExcluir);
-    renderTabela(formasFiltradas);
-    showToast('Forma de pagamento excluída com sucesso.');
+    const res = await fetch(`http://localhost:8080/api/pedido/excluir/${idParaExcluir}`, { method: 'DELETE' });
+    if (!res.ok) { showToast('Erro ao excluir pedido.', 'erro'); return; }
+    pedidos = pedidos.filter(p => p.id_pedido !== idParaExcluir);
+    pedidosFiltrados = pedidosFiltrados.filter(p => p.id_pedido !== idParaExcluir);
+    renderTabela(pedidosFiltrados);
+    showToast('Pedido excluído com sucesso.');
   }
 </script>
 </body>

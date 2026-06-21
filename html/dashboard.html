@@ -67,7 +67,7 @@
       <div style="display:flex;align-items:center;gap:.625rem;padding:.5rem;">
         <div style="width:1.75rem;height:1.75rem;border-radius:9999px;background:#FAD4DE;
                     display:flex;align-items:center;justify-content:center;
-                    font-size:.75rem;font-weight:700;color:#C9546E;">A</div>
+                    font-size:.75rem;font-weight:700;color:#C9546E;">A</div>  <!-- É o avatar do usuário: um círculo rosa com a letra "A" (inicial de "Admin"), já que não há foto de perfil. -->
         <div>
           <p style="font-size:.75rem;font-weight:500;color:#374151;" id="sidebar-usuario">Admin</p>
           <p style="font-size:.7rem;color:#d1d5db;" id="sidebar-email">admin@loja.com</p>
@@ -138,7 +138,8 @@
       <div class="card fade-up delay-2"
            style="cursor:pointer;transition:box-shadow .2s;"
            onmouseover="this.style.boxShadow='0 8px 32px rgba(200,120,140,.2)'"
-           onmouseout="this.style.boxShadow=''">
+           onmouseout="this.style.boxShadow=''"
+           onclick="window.location.href='pedido-form.html'">
         <span style="font-size:1.5rem;display:block;margin-bottom:.5rem;">📋</span>
         <p style="font-weight:500;color:#1f2937;font-size:.875rem;">Novo Pedido</p>
         <p style="font-size:.75rem;color:#9ca3af;margin-top:.25rem;">Registrar venda</p>
@@ -146,7 +147,8 @@
       <div class="card fade-up delay-3"
            style="cursor:pointer;transition:box-shadow .2s;"
            onmouseover="this.style.boxShadow='0 8px 32px rgba(200,120,140,.2)'"
-           onmouseout="this.style.boxShadow=''">
+           onmouseout="this.style.boxShadow=''"
+           onclick="window.location.href='cliente-form.html'">
         <span style="font-size:1.5rem;display:block;margin-bottom:.5rem;">👤</span>
         <p style="font-weight:500;color:#1f2937;font-size:.875rem;">Novo Cliente</p>
         <p style="font-size:.75rem;color:#9ca3af;margin-top:.25rem;">Cadastrar cliente</p>
@@ -161,12 +163,12 @@
           <tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Status</th><th>Data</th></tr>
         </thead>
         <tbody id="tbody-pedidos">
-          <!-- preenchido pelo JS -->
+          <tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:1.5rem;">Carregando...</td></tr>
         </tbody>
       </table>
       <div style="display:flex;align-items:center;justify-content:flex-end;padding:.75rem 1rem;
                   border-top:1px solid #FFF0F4;font-size:.75rem;color:#9ca3af;">
-        <a href="#" style="color:#C9546E;font-weight:500;">Ver todos os pedidos →</a>
+        <a href="pedidos-lista.html" style="color:#C9546E;font-weight:500;">Ver todos os pedidos →</a>
       </div>
     </div>
 
@@ -175,49 +177,66 @@
 
 <script src="../js/app.js"></script>
 <script>
-  // ── Data ────────────────────────────────────────────────────────
+  // Data exibida no topo da página
   document.getElementById('data-hoje').textContent = formatarDataHoje();
 
-  // ── KPIs — integrar com GET /api/dashboard ──────────────────────
-  // async function carregarKPIs() {
-  //   const res  = await fetch('/api/dashboard', { headers:{ Authorization:'Bearer '+localStorage.getItem('token') }});
-  //   const data = await res.json();
-  //   document.getElementById('kpi-pedidos').textContent  = data.pedidos_hoje;
-  //   document.getElementById('kpi-fat').textContent      = formatarMoeda(data.faturamento_hoje);
-  //   document.getElementById('kpi-produtos').textContent = data.produtos_ativos;
-  //   document.getElementById('kpi-clientes').textContent = data.total_clientes;
-  // }
-  // carregarKPIs();
-
-  // Dados de exemplo (remover quando integrar com backend)
-  document.getElementById('kpi-pedidos').textContent  = '38';
-  document.getElementById('kpi-fat').textContent      = 'R$ 2.840,00';
-  document.getElementById('kpi-produtos').textContent = '124';
-  document.getElementById('kpi-clientes').textContent = '312';
-
-  // ── Últimos pedidos ─────────────────────────────────────────────
-  const pedidosExemplo = [
-    { id:1042, cliente:'Ana Beatriz',   total:185.00, status:'Entregue', dt:'22/03/2025' },
-    { id:1041, cliente:'Camila Souza',  total:92.50,  status:'Preparo',  dt:'22/03/2025' },
-    { id:1040, cliente:'Fernanda Lima', total:310.00, status:'Entregue', dt:'21/03/2025' },
-    { id:1039, cliente:'Juliana Ramos', total:58.00,  status:'Pendente', dt:'21/03/2025' },
-  ];
-
-  const badgeClass = {
-    'Entregue': 'badge badge-green',
-    'Preparo':  'badge badge-yellow',
-    'Pendente': 'badge badge-rose',
+  // Cor dos badges de status — mesma lógica da pedidos-lista.html
+  const STATUS_BADGE = {
+    'Pendente':   'badge badge-rose',
+    'Preparo':    'badge badge-yellow',
+    'Entregue':   'badge badge-green',
+    'Cancelado':  'badge badge-gray',
   };
 
-  document.getElementById('tbody-pedidos').innerHTML = pedidosExemplo.map(p => `
-    <tr>
-      <td style="color:#9ca3af;">#${p.id}</td>
-      <td style="font-weight:500;color:#1f2937;">${p.cliente}</td>
-      <td>${formatarMoeda(p.total)}</td>
-      <td><span class="${badgeClass[p.status] || 'badge badge-gray'}">${p.status}</span></td>
-      <td>${p.dt}</td>
-    </tr>
-  `).join('');
+  // Carrega todos os KPIs e a tabela de últimos pedidos de uma vez só
+  async function carregarDashboard() {
+    try {
+      const res = await fetch('http://localhost:8080/api/dashboard');
+      if (!res.ok) throw new Error('Falha ao buscar dados');
+      const data = await res.json();
+
+      // Preenche os 4 cards de KPI
+      document.getElementById('kpi-pedidos').textContent  = data.pedidos_hoje;
+      document.getElementById('kpi-fat').textContent      = formatarMoeda(data.faturamento_hoje);
+      document.getElementById('kpi-produtos').textContent = data.produtos_ativos;
+      document.getElementById('kpi-clientes').textContent = data.total_clientes;
+
+      // Monta a tabela dos últimos pedidos
+      const tbody = document.getElementById('tbody-pedidos');
+      if (!data.ultimos_pedidos || data.ultimos_pedidos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:1.5rem;">Nenhum pedido cadastrado</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.ultimos_pedidos.map(p => `
+        <tr>
+          <td style="color:#9ca3af;">#${p.id_pedido}</td>
+          <td style="font-weight:500;color:#1f2937;">${p.nome_cliente || '—'}</td>
+          <td>${formatarMoeda(p.vlr_total_pedido)}</td>
+          <td><span class="${STATUS_BADGE[p.status_entrega] || 'badge badge-gray'}">${p.status_entrega}</span></td>
+          <td>${formatarData(p.dt_pedido)}</td>
+        </tr>
+      `).join('');
+
+    } catch (err) {
+      //Se a API não estiver disponível, mostra mensagem no lugar dos números
+      ['kpi-pedidos','kpi-fat','kpi-produtos','kpi-clientes'].forEach(id => {
+        document.getElementById(id).textContent = '—';
+      });
+      document.getElementById('tbody-pedidos').innerHTML =
+        '<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:1.5rem;">Servidor indisponível</td></tr>';
+    }
+  }
+
+  // Formata data ISO (YYYY-MM-DD) para DD/MM/YYYY na tabela
+  function formatarData(iso) {
+    if (!iso) return '—';
+    const partes = iso.split('T')[0].split('-');
+    if (partes.length < 3) return iso;
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+
+  carregarDashboard();
 </script>
 </body>
 </html>
