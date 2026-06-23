@@ -88,7 +88,7 @@
     <a class="nav-item" data-nav="produtos"   href="produtos-lista.html"><i class="fa-solid fa-cake-candles icon"></i> Produtos</a>
     <a class="nav-item" data-nav="clientes"   href="clientes-lista.html"><i class="fa-solid fa-users icon"></i> Clientes</a>
     <a class="nav-item" data-nav="pedidos"    href="pedidos-lista.html"><i class="fa-solid fa-bag-shopping icon"></i> Pedidos</a>
-    <a class="nav-item" data-nav="pagamentos" href="#"><i class="fa-solid fa-credit-card icon"></i> Formas de Pagamento</a>
+    <a class="nav-item" data-nav="pagamentos" href="pagamentos-lista.html"><i class="fa-solid fa-credit-card icon"></i> Formas de Pagamento</a>
     <a class="nav-item" data-nav="usuarios"   href="usuarios-lista.html"><i class="fa-solid fa-user-shield icon"></i> Usuários</a>
     <div style="flex:1;"></div>
     <div style="border-top:1px solid #FFF0F4;padding-top:.75rem;margin-top:.75rem;">
@@ -295,38 +295,54 @@
   function validar() {
     let ok = true;
 
-    function checar(id, errId, msg, condicao) {
-      const el  = document.getElementById(id);
-      const err = document.getElementById(errId);
-      if (condicao(el.value)) {
-        el.classList.add('invalid');
-        err.textContent = msg;
-        ok = false;
-      } else {
-        el.classList.remove('invalid');
-        err.textContent = '';
-      }
+    const nome    = document.getElementById('f-nome');
+    const errNome = document.getElementById('err-nome');
+    if (!nome.value.trim()) {
+      nome.classList.add('invalid'); errNome.textContent = 'Informe o nome completo.';
+      ok = false;
+    } else {
+      nome.classList.remove('invalid'); errNome.textContent = '';
     }
 
-    checar('f-nome',  'err-nome',  'Informe o nome completo.', v => !v.trim());
-    checar('f-cpf',   'err-cpf',   'Informe o CPF.',           v => v.replace(/\D/g,'').length !== 11);
-    checar('f-email', 'err-email', 'Informe um e-mail válido.', v => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+    const cpfVal = document.getElementById('f-cpf').value.replace(/\D/g, '');
+    const cpfEl  = document.getElementById('f-cpf');
+    const errCpf = document.getElementById('err-cpf');
+    if (cpfVal.length !== 11) {
+      cpfEl.classList.add('invalid'); errCpf.textContent = 'CPF incompleto — informe os 11 dígitos.'; 
+      ok = false;
+    } else {
+      cpfEl.classList.remove('invalid'); errCpf.textContent = '';
+    }
+
+    const email    = document.getElementById('f-email');
+    const errEmail = document.getElementById('err-email');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+      email.classList.add('invalid'); errEmail.textContent = 'Informe um e-mail válido.'; 
+      ok = false;
+    } else {
+      email.classList.remove('invalid'); errEmail.textContent = '';
+    }
 
     const senha     = document.getElementById('f-senha').value;
     const confirmar = document.getElementById('f-confirmar').value;
 
     if (modo !== 'editar' || senha) {
-      // Novo usuário: senha obrigatória / Editar com senha preenchida: validar
-      checar('f-senha', 'err-senha', 'A senha deve ter pelo menos 6 caracteres.', v => v.length < 6);
-
-      if (senha !== confirmar) {
-        const el = document.getElementById('f-confirmar');
-        el.classList.add('invalid');
-        document.getElementById('err-confirmar').textContent = 'As senhas não coincidem.';
+      const senhaEl  = document.getElementById('f-senha');
+      const errSenha = document.getElementById('err-senha');
+      if (senha.length < 6) {
+        senhaEl.classList.add('invalid'); errSenha.textContent = 'A senha deve ter pelo menos 6 caracteres.'; 
         ok = false;
       } else {
-        document.getElementById('f-confirmar').classList.remove('invalid');
-        document.getElementById('err-confirmar').textContent = '';
+        senhaEl.classList.remove('invalid'); errSenha.textContent = '';
+      }
+
+      const confirmarEl  = document.getElementById('f-confirmar');
+      const errConfirmar = document.getElementById('err-confirmar');
+      if (senha !== confirmar) {
+        confirmarEl.classList.add('invalid'); errConfirmar.textContent = 'As senhas não coincidem.'; 
+        ok = false;
+      } else {
+        confirmarEl.classList.remove('invalid'); errConfirmar.textContent = '';
       }
     }
 
@@ -335,7 +351,7 @@
 
   // ── Salvar ───────────────────────────────────────────────────────
   async function salvar() {
-    //if (!validar()) return;
+    if (!validar()) return;
 
     const senha = document.getElementById('f-senha').value;
 

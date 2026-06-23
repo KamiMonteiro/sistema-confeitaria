@@ -81,8 +81,8 @@
     <div class="card fade-up delay-1"
          style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-bottom:1.25rem;padding:1rem;">
       <input id="filtro-nome" type="text" placeholder="🔍  Buscar por nome ou e-mail..." class="form-input"
-             style="max-width:260px;" oninput="filtrar()">
-      <button class="btn-mint" onclick="filtrar()">
+             style="max-width:260px;" oninput="filtrar()"> <!-- Ao digitar, ele filtra-->
+      <button class="btn-mint" onclick="filtrar()"><!-- Ao digitar e clicar no botão  filtrar, ele filtra-->
         <i class="fa-solid fa-magnifying-glass"></i> Filtrar
       </button>
       <button class="btn-secondary" onclick="limparFiltros()">
@@ -148,6 +148,7 @@
 <script>
  
   // ── Integrar com backend Go ──────────────────────────────────────
+      //async executa essa tarefa em segundo plano e a função carregarUsuarios() é chamada para buscar os usuários do backend.
   async function carregarUsuarios() {
     const res   = await fetch('http://localhost:8080/api/todos/usuario');
     usuarios    = await res.json() || [];
@@ -163,7 +164,7 @@
   // Carrega usuários ao iniciar a página
   carregarUsuarios();
 
-  // ── Render ───────────────────────────────────────────────────────
+  // ── Render - calculo de paginação───────────────────────────────────────────────────────
   function renderTabela(lista) {
     const inicio = (paginaAtual - 1) * POR_PAGINA;
     const pagina = lista.slice(inicio, inicio + POR_PAGINA);

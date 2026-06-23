@@ -59,7 +59,6 @@
           <label style="display:flex;align-items:center;gap:.375rem;cursor:pointer;">
             <input id="login-lembrar" type="checkbox" style="accent-color:#F4A7B9;"> Lembrar acesso
           </label>
-          <a href="#" style="color:#C9546E;">Esqueci a senha</a>
         </div>
       </div>
 
@@ -93,7 +92,7 @@
     });
 
     async function fazerLogin() {
-      const email = loginEmail.value.trim();
+      const email = loginEmail.value.trim();//trim: remove os espaços em branco no início e no fim da string
       const senha = document.getElementById('login-senha').value;
       const lembrar = loginLembrar.checked;
 
@@ -114,7 +113,7 @@
         return;
       }
 
-      const data = await res.json();
+      const data = await res.json();//pega a resposta da requisição 
 
       // Salva os dados do usuário logado — usados pelo sidebar em todas as telas
       localStorage.setItem('usuario_nome',  data.user.nome_usuario);
@@ -126,10 +125,15 @@
         localStorage.removeItem('login-email');
       }
 
-      window.location.href = 'dashboard.html';
+      window.location.href = 'dashboard.html'; //redirecionamento para a página do dashboard após o login bem-sucedido
     }
 
-    document.addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
+    // Permite o login ao pressionar Enter (e - evento)
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){
+        fazerLogin();
+      }
+    });
   </script>
 </body>
 </html>
