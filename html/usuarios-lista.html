@@ -81,12 +81,12 @@
     <div class="card fade-up delay-1"
          style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-bottom:1.25rem;padding:1rem;">
       <input id="filtro-nome" type="text" placeholder="🔍  Buscar por nome ou e-mail..." class="form-input"
-             style="max-width:260px;" oninput="filtrar()"> <!-- Ao digitar, ele filtra-->
-      <button class="btn-mint" onclick="filtrar()"><!-- Ao digitar e clicar no botão  filtrar, ele filtra-->
-        <i class="fa-solid fa-magnifying-glass"></i> Filtrar
+             style="max-width:260px;">
+      <button class="btn-mint" onclick="buscar()">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
       </button>
-      <button class="btn-secondary" onclick="limparFiltros()">
-        <i class="fa-solid fa-xmark"></i> Limpar
+      <button class="btn-secondary" onclick="mostrarTodos()">
+        <i class="fa-solid fa-list"></i> Mostrar todos
       </button>
     </div>
 
@@ -146,32 +146,26 @@
 
 <script src="../js/app.js"></script>
 <script>
- 
-  // ── Integrar com backend Go ──────────────────────────────────────
-      //async executa essa tarefa em segundo plano e a função carregarUsuarios() é chamada para buscar os usuários do backend.
-  async function carregarUsuarios() {
-    const res   = await fetch('http://localhost:8080/api/todos/usuario');
-    usuarios    = await res.json() || [];
-    usuariosFiltrados = [...usuarios];
-    renderTabela(usuariosFiltrados);
-  }
-  
   const POR_PAGINA = 10;
   let paginaAtual = 1;
-  let usuariosFiltrados = [];
+  let listaAtual = [];
   let idParaExcluir = null;
 
-  // Carrega usuários ao iniciar a página
+  async function carregarUsuarios() {
+    const res = await fetch('http://localhost:8080/api/todos/usuario');
+    listaAtual = await res.json() || [];
+    paginaAtual = 1;
+    renderTabela(listaAtual);
+  }
+
   carregarUsuarios();
 
-  // ── Render - calculo de paginação───────────────────────────────────────────────────────
   function renderTabela(lista) {
     const inicio = (paginaAtual - 1) * POR_PAGINA;
     const pagina = lista.slice(inicio, inicio + POR_PAGINA);
 
-    // Avatar com iniciais
     function iniciais(nome) {
-      return nome.split(' ').slice(0,2).map(p => p[0]).join('').toUpperCase();
+      return nome.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
     }
 
     document.getElementById('tbody-usuarios').innerHTML = pagina.map(u => `
@@ -199,7 +193,7 @@
                title="Editar">
               <i class="fa-solid fa-pen-to-square" style="font-size:.875rem;"></i>
             </a>
-            <button onclick="pedirExclusao(${u.id_usuario})"
+            <button onclick="pedirExclusao(${u.id_usuario}, ${JSON.stringify(u.nome_usuario)})"
                     style="display:inline-flex;align-items:center;justify-content:center;
                            width:2rem;height:2rem;border-radius:.5rem;color:#d1d5db;
                            background:transparent;border:none;cursor:pointer;transition:all .2s;"
@@ -213,11 +207,10 @@
       </tr>
     `).join('') || '<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:2rem;">Nenhum usuário encontrado.</td></tr>';
 
-    // Paginação
     const total  = lista.length;
-    const paginas = Math.ceil(total / POR_PAGINA);
+    const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
     document.getElementById('pag-info').textContent =
-      `Mostrando ${Math.min(inicio+1,total)}–${Math.min(inicio+POR_PAGINA,total)} de ${total} registros`;
+      `Mostrando ${Math.min(inicio + 1, total)}–${Math.min(inicio + POR_PAGINA, total)} de ${total} registros`;
 
     const botoes = document.getElementById('pag-botoes');
     botoes.innerHTML = '';
@@ -225,60 +218,39 @@
       const btn = document.createElement('button');
       btn.textContent = i;
       btn.style.cssText = `padding:.25rem .625rem;border-radius:.5rem;font-size:.75rem;border:none;cursor:pointer;
-                           background:${i===paginaAtual?'#FAD4DE':'transparent'};
-                           color:${i===paginaAtual?'#C9546E':'#9ca3af'};font-weight:${i===paginaAtual?'600':'400'};`;
-      btn.onclick = () => { paginaAtual = i; renderTabela(usuariosFiltrados); };
+                           background:${i === paginaAtual ? '#FAD4DE' : 'transparent'};
+                           color:${i === paginaAtual ? '#C9546E' : '#9ca3af'};
+                           font-weight:${i === paginaAtual ? '600' : '400'};`;
+      btn.onclick = () => { paginaAtual = i; renderTabela(listaAtual); };
       botoes.appendChild(btn);
     }
   }
 
-  // ── Filtros ──────────────────────────────────────────────────────
-  async function filtrar() {
+  async function buscar() {
     const texto = document.getElementById('filtro-nome').value.trim();
-
-    const url = texto 
-      ? `http://localhost:8080/api/usuarios/buscar?nome=${encodeURIComponent(texto)}`
-      : `http://localhost:8080/api/todos/usuario`;
-
-    const res = await fetch(url);
-    usuariosFiltrados = await res.json() || [];
-
+    const res = await fetch(`http://localhost:8080/api/usuarios/buscar?nome=${encodeURIComponent(texto)}`);
+    listaAtual = await res.json() || [];
     paginaAtual = 1;
-    renderTabela(usuariosFiltrados);
+    renderTabela(listaAtual);
   }
 
-  function limparFiltros() {
+  function mostrarTodos() {
     document.getElementById('filtro-nome').value = '';
-    usuariosFiltrados = [...usuarios];
-    paginaAtual = 1;
-    renderTabela(usuariosFiltrados);
+    carregarUsuarios();
   }
 
-  // ── Exclusão ─────────────────────────────────────────────────────
-  function pedirExclusao(id) {
+  function pedirExclusao(id, nome) {
     idParaExcluir = id;
-    const usuario = usuarios.find(u => u.id_usuario === id);
-    document.getElementById('modal-usuario-nome').textContent = usuario ? usuario.nome_usuario : '';
+    document.getElementById('modal-usuario-nome').textContent = nome;
     abrirModal('modal-excluir');
   }
 
   async function confirmarExclusao() {
     fecharModal('modal-excluir');
-
-    const res = await fetch(`http://localhost:8080/api/usuarios/excluir/${idParaExcluir}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-    if (!res.ok) {
-      showToast('Erro ao excluir usuário.', 'erro');
-      return;
-    }
-
-    usuarios = usuarios.filter(u => u.id_usuario !== idParaExcluir);
-    usuariosFiltrados = usuariosFiltrados.filter(u => u.id_usuario !== idParaExcluir);
-    renderTabela(usuariosFiltrados);
+    const res = await fetch(`http://localhost:8080/api/usuarios/excluir/${idParaExcluir}`, { method: 'DELETE' });
+    if (!res.ok) { showToast('Erro ao excluir usuário.', 'erro'); return; }
     showToast('Usuário excluído com sucesso.');
+    buscar();
   }
 </script>
 </body>

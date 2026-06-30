@@ -154,8 +154,7 @@
 <script>
   const POR_PAGINA = 10;
   let paginaAtual = 1;
-  let pedidos = [];
-  let pedidosFiltrados = [];
+  let listaAtual = [];
   let idParaExcluir = null;
 
   const STATUS_BADGE = {
@@ -168,9 +167,9 @@
 
   async function carregarPedidos() {
     const res = await fetch('http://localhost:8080/api/todos/pedido');
-    pedidos = await res.json() || [];
-    pedidosFiltrados = [...pedidos];
-    renderTabela(pedidosFiltrados);
+    listaAtual = await res.json() || [];
+    paginaAtual = 1;
+    renderTabela(listaAtual);
   }
 
   carregarPedidos();
@@ -235,28 +234,22 @@
                            background:${i === paginaAtual ? '#FAD4DE' : 'transparent'};
                            color:${i === paginaAtual ? '#C9546E' : '#9ca3af'};
                            font-weight:${i === paginaAtual ? '600' : '400'};`;
-      btn.onclick = () => { paginaAtual = i; renderTabela(pedidosFiltrados); };
+      btn.onclick = () => { paginaAtual = i; renderTabela(listaAtual); };
       botoes.appendChild(btn);
     }
   }
 
   async function buscar() {
     const status = document.getElementById('filtro-status').value;
-    if (status) {
-      const res = await fetch(`http://localhost:8080/api/pedido/buscar?status=${encodeURIComponent(status)}`);
-      pedidosFiltrados = await res.json() || [];
-    } else {
-      pedidosFiltrados = [...pedidos];
-    }
+    const res = await fetch(`http://localhost:8080/api/pedido/buscar?status=${encodeURIComponent(status)}`);
+    listaAtual = await res.json() || [];
     paginaAtual = 1;
-    renderTabela(pedidosFiltrados);
+    renderTabela(listaAtual);
   }
 
   function mostrarTodos() {
     document.getElementById('filtro-status').value = '';
-    pedidosFiltrados = [...pedidos];
-    paginaAtual = 1;
-    renderTabela(pedidosFiltrados);
+    carregarPedidos();
   }
 
   function pedirExclusao(id) {
@@ -269,10 +262,8 @@
     fecharModal('modal-excluir');
     const res = await fetch(`http://localhost:8080/api/pedido/excluir/${idParaExcluir}`, { method: 'DELETE' });
     if (!res.ok) { showToast('Erro ao excluir pedido.', 'erro'); return; }
-    pedidos = pedidos.filter(p => p.id_pedido !== idParaExcluir);
-    pedidosFiltrados = pedidosFiltrados.filter(p => p.id_pedido !== idParaExcluir);
-    renderTabela(pedidosFiltrados);
     showToast('Pedido excluído com sucesso.');
+    buscar();
   }
 </script>
 </body>

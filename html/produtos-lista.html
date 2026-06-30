@@ -160,18 +160,42 @@
 <script>
   const POR_PAGINA = 10;
   let paginaAtual = 1;
-  let produtos = [];
-  let produtosFiltrados = [];
+  let listaAtual = [];  // resultado da última requisição, usado pela paginação
   let idParaExcluir = null;
 
+  // Carrega todos os produtos — chamado ao abrir e no "Mostrar todos"
   async function carregarProdutos() {
     const res = await fetch('http://localhost:8080/api/todos/produto');
-    produtos = await res.json() || [];
-    produtosFiltrados = [...produtos];
-    renderTabela(produtosFiltrados);
+    listaAtual = await res.json() || [];
+    paginaAtual = 1;
+    renderTabela(listaAtual);
   }
 
   carregarProdutos();
+
+  // Busca pelo nome na API; categoria e status filtram localmente no resultado
+  async function buscar() {
+    const texto = document.getElementById('filtro-nome').value.trim();
+    const cat   = document.getElementById('filtro-cat').value;
+    const ativo = document.getElementById('filtro-ativo').value;
+
+    const res = await fetch(`http://localhost:8080/api/produto/buscar?nome=${encodeURIComponent(texto)}`);
+    listaAtual = await res.json() || [];
+
+    if (cat)   listaAtual = listaAtual.filter(p => p.categoria === cat);
+    if (ativo) listaAtual = listaAtual.filter(p => p.ativo === ativo);
+
+    paginaAtual = 1;
+    renderTabela(listaAtual);
+  }
+
+  // Limpa os filtros e faz nova requisição
+  function mostrarTodos() {
+    document.getElementById('filtro-nome').value  = '';
+    document.getElementById('filtro-cat').value   = '';
+    document.getElementById('filtro-ativo').value = '';
+    carregarProdutos();
+  }
 
   function renderTabela(lista) {
     const inicio = (paginaAtual - 1) * POR_PAGINA;
@@ -228,38 +252,9 @@
                            background:${i === paginaAtual ? '#FAD4DE' : 'transparent'};
                            color:${i === paginaAtual ? '#C9546E' : '#9ca3af'};
                            font-weight:${i === paginaAtual ? '600' : '400'};`;
-      btn.onclick = () => { paginaAtual = i; renderTabela(produtosFiltrados); };
+      btn.onclick = () => { paginaAtual = i; renderTabela(listaAtual); };
       botoes.appendChild(btn);
     }
-  }
-
-  async function buscar() {
-    const texto = document.getElementById('filtro-nome').value.trim();
-    const cat   = document.getElementById('filtro-cat').value;
-    const ativo = document.getElementById('filtro-ativo').value;
-
-    if (texto) {
-      const res = await fetch(`http://localhost:8080/api/produto/buscar?nome=${encodeURIComponent(texto)}`);
-      produtosFiltrados = await res.json() || [];
-    } else {
-      produtosFiltrados = [...produtos];
-    }
-
-    // Filtros locais
-    if (cat)   produtosFiltrados = produtosFiltrados.filter(p => p.categoria === cat);
-    if (ativo) produtosFiltrados = produtosFiltrados.filter(p => p.ativo === ativo);
-
-    paginaAtual = 1;
-    renderTabela(produtosFiltrados);
-  }
-
-  function mostrarTodos() {
-    document.getElementById('filtro-nome').value  = '';
-    document.getElementById('filtro-cat').value   = '';
-    document.getElementById('filtro-ativo').value = '';
-    produtosFiltrados = [...produtos];
-    paginaAtual = 1;
-    renderTabela(produtosFiltrados);
   }
 
   function pedirExclusao(id, nome) {
@@ -272,10 +267,8 @@
     fecharModal('modal-excluir');
     const res = await fetch(`http://localhost:8080/api/produto/excluir/${idParaExcluir}`, { method: 'DELETE' });
     if (!res.ok) { showToast('Erro ao excluir produto.', 'erro'); return; }
-    produtos = produtos.filter(p => p.id_produto !== idParaExcluir);
-    produtosFiltrados = produtosFiltrados.filter(p => p.id_produto !== idParaExcluir);
-    renderTabela(produtosFiltrados);
     showToast('Produto excluído com sucesso.');
+    buscar();
   }
 </script>
 </body>

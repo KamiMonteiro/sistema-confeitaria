@@ -150,20 +150,18 @@
 <script>
   const POR_PAGINA = 10;
   let paginaAtual = 1;
-  let formas = [];
-  let formasFiltradas = [];
+  let listaAtual = [];
   let idParaExcluir = null;
 
   async function carregarFormas() {
     const res = await fetch('http://localhost:8080/api/todos/pagamento');
-    formas = await res.json() || [];
-    formasFiltradas = [...formas];
-    renderTabela(formasFiltradas);
+    listaAtual = await res.json() || [];
+    paginaAtual = 1;
+    renderTabela(listaAtual);
   }
 
   carregarFormas();
 
-  // ── Render ───────────────────────────────────────────────────────
   function renderTabela(lista) {
     const inicio = (paginaAtual - 1) * POR_PAGINA;
     const pagina = lista.slice(inicio, inicio + POR_PAGINA);
@@ -216,42 +214,31 @@
                            background:${i === paginaAtual ? '#FAD4DE' : 'transparent'};
                            color:${i === paginaAtual ? '#C9546E' : '#9ca3af'};
                            font-weight:${i === paginaAtual ? '600' : '400'};`;
-      btn.onclick = () => { paginaAtual = i; renderTabela(formasFiltradas); };
+      btn.onclick = () => { paginaAtual = i; renderTabela(listaAtual); };
       botoes.appendChild(btn);
     }
   }
 
-  // ── Filtros ──────────────────────────────────────────────────────
+  // Busca por descrição na API; status filtra localmente no resultado
   async function buscar() {
-    const texto = document.getElementById('filtro-descricao').value.trim();
+    const texto  = document.getElementById('filtro-descricao').value.trim();
     const status = document.getElementById('filtro-status').value;
 
-    // Busca por descrição via API se houver texto, senão usa tudo que já está em memória
-    if (texto) {
-      const res = await fetch(`http://localhost:8080/api/pagamento/buscar?descricao=${encodeURIComponent(texto)}`);
-      formasFiltradas = await res.json() || [];
-    } else {
-      formasFiltradas = [...formas];
-    }
+    const res = await fetch(`http://localhost:8080/api/pagamento/buscar?descricao=${encodeURIComponent(texto)}`);
+    listaAtual = await res.json() || [];
 
-    // Filtro de status é sempre local
-    if (status) {
-      formasFiltradas = formasFiltradas.filter(f => f.ativo === status);
-    }
+    if (status) listaAtual = listaAtual.filter(f => f.ativo === status);
 
     paginaAtual = 1;
-    renderTabela(formasFiltradas);
+    renderTabela(listaAtual);
   }
 
   function mostrarTodos() {
     document.getElementById('filtro-descricao').value = '';
-    document.getElementById('filtro-status').value = '';
-    formasFiltradas = [...formas];
-    paginaAtual = 1;
-    renderTabela(formasFiltradas);
+    document.getElementById('filtro-status').value   = '';
+    carregarFormas();
   }
 
-  // ── Exclusão ─────────────────────────────────────────────────────
   function pedirExclusao(id, descricao) {
     idParaExcluir = id;
     document.getElementById('modal-nome-pgto').textContent = descricao;
@@ -261,14 +248,9 @@
   async function confirmarExclusao() {
     fecharModal('modal-excluir');
     const res = await fetch(`http://localhost:8080/api/pagamento/excluir/${idParaExcluir}`, { method: 'DELETE' });
-    if (!res.ok) {
-      showToast('Erro ao excluir forma de pagamento.', 'erro');
-      return;
-    }
-    formas = formas.filter(f => f.id_forma_pagamento !== idParaExcluir);
-    formasFiltradas = formasFiltradas.filter(f => f.id_forma_pagamento !== idParaExcluir);
-    renderTabela(formasFiltradas);
+    if (!res.ok) { showToast('Erro ao excluir forma de pagamento.', 'erro'); return; }
     showToast('Forma de pagamento excluída com sucesso.');
+    buscar();
   }
 </script>
 </body>

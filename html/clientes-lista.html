@@ -146,19 +146,16 @@
 <script>
   const POR_PAGINA = 10;
   let paginaAtual = 1;
-  let clientes = [];
-  let clientesFiltrados = [];
+  let listaAtual = [];
   let idParaExcluir = null;
 
-  // Formata CPF de 11 dígitos → 000.000.000-00
   function formatarCPF(v) {
     if (!v) return '—';
     const d = v.replace(/\D/g, '');
-    if (d.length !== 11) return v; // se vier já formatado ou inválido, exibe como está
+    if (d.length !== 11) return v;
     return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   }
 
-  // Formata telefone de 10/11 dígitos → (XX) XXXX-XXXX ou (XX) XXXXX-XXXX
   function formatarTelefone(v) {
     if (!v) return '—';
     const d = v.replace(/\D/g, '');
@@ -169,9 +166,9 @@
 
   async function carregarClientes() {
     const res = await fetch('http://localhost:8080/api/todos/cliente');
-    clientes = await res.json() || [];
-    clientesFiltrados = [...clientes];
-    renderTabela(clientesFiltrados);
+    listaAtual = await res.json() || [];
+    paginaAtual = 1;
+    renderTabela(listaAtual);
   }
 
   carregarClientes();
@@ -238,28 +235,22 @@
                            background:${i === paginaAtual ? '#FAD4DE' : 'transparent'};
                            color:${i === paginaAtual ? '#C9546E' : '#9ca3af'};
                            font-weight:${i === paginaAtual ? '600' : '400'};`;
-      btn.onclick = () => { paginaAtual = i; renderTabela(clientesFiltrados); };
+      btn.onclick = () => { paginaAtual = i; renderTabela(listaAtual); };
       botoes.appendChild(btn);
     }
   }
 
   async function buscar() {
     const texto = document.getElementById('filtro-nome').value.trim();
-    if (texto) {
-      const res = await fetch(`http://localhost:8080/api/cliente/buscar?nome=${encodeURIComponent(texto)}`);
-      clientesFiltrados = await res.json() || [];
-    } else {
-      clientesFiltrados = [...clientes];
-    }
+    const res = await fetch(`http://localhost:8080/api/cliente/buscar?nome=${encodeURIComponent(texto)}`);
+    listaAtual = await res.json() || [];
     paginaAtual = 1;
-    renderTabela(clientesFiltrados);
+    renderTabela(listaAtual);
   }
 
   function mostrarTodos() {
     document.getElementById('filtro-nome').value = '';
-    clientesFiltrados = [...clientes];
-    paginaAtual = 1;
-    renderTabela(clientesFiltrados);
+    carregarClientes();
   }
 
   function pedirExclusao(id, nome) {
@@ -271,14 +262,9 @@
   async function confirmarExclusao() {
     fecharModal('modal-excluir');
     const res = await fetch(`http://localhost:8080/api/cliente/excluir/${idParaExcluir}`, { method: 'DELETE' });
-    if (!res.ok) {
-      showToast('Erro ao excluir cliente.', 'erro');
-      return;
-    }
-    clientes = clientes.filter(c => c.id_cliente !== idParaExcluir);
-    clientesFiltrados = clientesFiltrados.filter(c => c.id_cliente !== idParaExcluir);
-    renderTabela(clientesFiltrados);
+    if (!res.ok) { showToast('Erro ao excluir cliente.', 'erro'); return; }
     showToast('Cliente excluído com sucesso.');
+    buscar();
   }
 </script>
 </body>
