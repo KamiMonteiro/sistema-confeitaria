@@ -351,19 +351,18 @@
 
   function renderItens() {
     const container = document.getElementById('lista-itens');
-    const vazio     = document.getElementById('itens-vazio');
     const resumo    = document.getElementById('resumo-itens');
 
     if (itens.length === 0) {
-      container.innerHTML = '';
-      container.appendChild(vazio);
-      vazio.style.display = 'block';
+      container.innerHTML = `
+        <p style="font-size:.875rem;color:#d1d5db;text-align:center;padding:1rem 0;" id="itens-vazio">
+          Nenhum item adicionado.
+        </p>`;
       resumo.innerHTML = '';
       document.getElementById('total-geral').textContent = 'R$ 0,00';
       return;
     }
 
-    vazio.style.display = 'none';
     container.innerHTML = itens.map((item, idx) => `
       <div class="item-row">
         <div>

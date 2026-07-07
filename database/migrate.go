@@ -71,7 +71,7 @@ func RunMigrations(db *sql.DB) {
 			id_cliente         integer,
 			id_forma_pagamento integer,
 			id_usuario         integer,
-			FOREIGN KEY(id_cliente)         REFERENCES CLIENTE(id_cliente),
+			FOREIGN KEY(id_cliente)         REFERENCES CLIENTE(id_cliente) ON DELETE RESTRICT,
 			FOREIGN KEY(id_forma_pagamento) REFERENCES FORMA_PAGAMENTO(id_forma_pagamento),
 			FOREIGN KEY(id_usuario)         REFERENCES USUARIO(id_usuario)
 		);`},

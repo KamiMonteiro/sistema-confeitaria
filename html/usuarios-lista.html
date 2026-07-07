@@ -239,11 +239,15 @@
     carregarUsuarios();
   }
 
-  function pedirExclusao(id, nome) {
+ function pedirExclusao(id, nome) {
+    console.log("pedirExclusao");
+    console.log(id);
+    console.log(nome);
+
     idParaExcluir = id;
     document.getElementById('modal-usuario-nome').textContent = nome;
     abrirModal('modal-excluir');
-  }
+}
 
   async function confirmarExclusao() {
     fecharModal('modal-excluir');
